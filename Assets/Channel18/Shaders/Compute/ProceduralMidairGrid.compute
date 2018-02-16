@@ -1,0 +1,36 @@
+﻿#pragma kernel Setup
+#pragma kernel Update
+#pragma kernel Rotate
+
+#define THREAD [numthreads(8,1,1)]
+#define DISCARD if((int)id.x >= _InstancesCount) return;
+
+#include "../Common/ProceduralGrid.cginc"
+
+RWStructuredBuffer<Grid> _Grids;
+
+int _InstancesCount;
+int _Width, _Height, _Depth;
+
+float4 _Time;
+float _DT;
+
+half4 _NoiseParams;
+
+THREAD
+void Setup (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+}
+
+THREAD
+void Update (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+}
+
+THREAD
+void Rotate (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+}

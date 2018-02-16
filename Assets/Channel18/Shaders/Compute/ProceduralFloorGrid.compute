@@ -1,0 +1,55 @@
+﻿#pragma kernel Setup
+#pragma kernel Update
+#pragma kernel Noise
+
+#define THREAD [numthreads(8,1,1)]
+#define DISCARD if((int)id.x >= _InstancesCount) return;
+
+#include "../Common/ProceduralGrid.cginc"
+
+#include "../Common/Noise/ClassicNoise2D.cginc"
+#define noise2D cnoise
+#include "../Common/FBM.cginc"
+
+RWStructuredBuffer<Grid> _Grids;
+
+int _InstancesCount;
+int _Width, _Height, _Depth;
+
+float4 _Time;
+float _DT;
+
+half4 _NoiseParams;
+half2 _Radius;
+
+THREAD
+void Setup (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+}
+
+THREAD
+void Update (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+    grid.scale = lerp(grid.scale, float3(1, 1, 1), _DT * grid.mass);
+    _Grids[id.x] = grid;
+}
+
+THREAD
+void Noise (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+
+    float2 seed = grid.position.xz * _NoiseParams.z + float2(_DT, _Time.x * _NoiseParams.y);
+    float l = length(grid.position.xz);
+    float s = smoothstep(_Radius.x, _Radius.y, l);
+    float n = max(0, (fbm_pattern(seed) + 1.0) * 0.5) * _NoiseParams.x;
+    grid.scale = float3(1, max(1, n * s), 1);
+
+    _Grids[id.x] = grid;
+}
