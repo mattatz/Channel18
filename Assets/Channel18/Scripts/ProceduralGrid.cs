@@ -18,8 +18,8 @@ namespace VJ.Channel18
         [SerializeField] protected Mesh mesh;
         [SerializeField] protected Material render;
         [SerializeField] protected ComputeShader compute;
-        [SerializeField] ShadowCastingMode shadowCasting = ShadowCastingMode.On;
-        [SerializeField] bool receiveShadow = true;
+        [SerializeField] protected ShadowCastingMode shadowCasting = ShadowCastingMode.On;
+        [SerializeField] protected bool receiveShadow = true;
 
         #region Grid properties
 

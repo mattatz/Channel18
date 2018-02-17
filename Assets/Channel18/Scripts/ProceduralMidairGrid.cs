@@ -1,6 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+
 using UnityEngine;
+using Random = UnityEngine.Random;
+using UnityEngine.Rendering;
 
 namespace VJ.Channel18
 {
@@ -8,6 +14,17 @@ namespace VJ.Channel18
     public class ProceduralMidairGrid : ProceduralGrid {
 
         [SerializeField, Range(0f, 1f)] protected float extrusion = 0.05f, thickness = 0.001f;
+
+        protected ComputeBuffer supportBuffer;
+
+        [StructLayout(LayoutKind.Sequential)]
+        protected struct SupportData_t
+        {
+            bool flag;
+            Vector3 axis;
+        };
+
+        protected const string kExtrusionKey = "_Extrusion", kThicknessKey = "_Thickness";
 
         protected override void Start ()
         {
@@ -19,9 +36,27 @@ namespace VJ.Channel18
             Render();
         }
 
+        protected override void Render()
+        {
+            render.SetBuffer(kGridsKey, gridBuffer);
+            render.SetFloat(kExtrusionKey, extrusion);
+            render.SetFloat(kThicknessKey, thickness);
+            Graphics.DrawMesh(mesh, transform.localToWorldMatrix, render, 0, null, 0, null, shadowCasting, receiveShadow);
+        }
+
         protected override Mesh Build()
         {
-            return BuildCross(extrusion, thickness);
+            // return BuildCross(extrusion, thickness);
+
+            var mesh = new Mesh();
+            var count = width * height * depth;
+            var indices = new int[count];
+            for(int i = 0; i < count; i++) indices[i] = i;
+            mesh.vertices = new Vector3[count];
+			mesh.indexFormat = (count > 65000) ? IndexFormat.UInt16 : IndexFormat.UInt32;
+            mesh.SetIndices(indices, MeshTopology.Points, 0);
+            mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000f);
+            return mesh;
         }
 
         protected Mesh BuildCross(

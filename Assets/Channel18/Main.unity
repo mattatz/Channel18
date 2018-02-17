@@ -140,9 +140,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77e725d9f2a79bd4bacb6946a51928bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 32
-  height: 32
-  depth: 32
+  width: 16
+  height: 16
+  depth: 16
   mesh: {fileID: 0}
   render: {fileID: 2100000, guid: 65cfc88567ed5c94dadddb4b5a1bb969, type: 2}
   compute: {fileID: 7200000, guid: f533876d301e0404daddc735f5208ac3, type: 3}
@@ -150,8 +150,8 @@ MonoBehaviour:
   receiveShadow: 0
   massMin: 0.5
   massMax: 1
-  extrusion: 0.05
-  thickness: 0.0075
+  extrusion: 0.1
+  thickness: 0.015
 --- !u!4 &28157039
 Transform:
   m_ObjectHideFlags: 0
@@ -160,7 +160,7 @@ Transform:
   m_GameObject: {fileID: 28157037}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 16, y: 16, z: 16}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -450,7 +450,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1934026929
 Transform:
   m_ObjectHideFlags: 0

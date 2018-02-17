@@ -1,4 +1,4 @@
-﻿Shader "VJ/Channel18/Grid" {
+﻿Shader "VJ/Channel18/FloorGrid" {
 
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
