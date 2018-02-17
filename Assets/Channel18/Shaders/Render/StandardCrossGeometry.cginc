@@ -35,7 +35,7 @@ struct Attributes
 {
     float4 position : POSITION;
     float4 rotation : TANGENT;
-    float size : TEXCOORD0;
+    float2 scale : NORMAL;
 };
 
 // Fragment varyings
@@ -65,7 +65,7 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
     Grid grid = _Grids[vid];
     input.position.xyz = grid.position.xyz;
     input.rotation = grid.rotation;
-    input.size = _Size;
+    input.scale.xy = grid.scale.xy;
     return input;
 }
 
@@ -166,14 +166,17 @@ void addCube(float3 pos, float3 right, float3 up, float3 forward, inout Triangle
 [maxvertexcount(72)]
 void Geometry (point Attributes IN[1], inout TriangleStream<Varyings> OUT) {
     float3 pos = IN[0].position.xyz;
-    float hs = IN[0].size * 0.5f;
+    float hs = _Size * 0.5f;
     float3 right = rotate_vector(float3(1, 0, 0), IN[0].rotation) * hs;
     float3 up = rotate_vector(float3(0, 1, 0), IN[0].rotation) * hs;
     float3 forward = rotate_vector(float3(0, 0, 1), IN[0].rotation) * hs;
 
-    addCube(pos, right * _Thickness, up * _Thickness, forward * _Extrusion, OUT);
-    addCube(pos, right * _Extrusion, up * _Thickness, forward * _Thickness, OUT);
-    addCube(pos, right * _Thickness, up * _Extrusion, forward * _Thickness, OUT);
+    float extrusion = lerp(_Thickness, _Extrusion, IN[0].scale.x);
+    float thickness = _Thickness  * IN[0].scale.y;
+
+    addCube(pos, right * thickness, up * thickness, forward * extrusion, OUT);
+    addCube(pos, right * extrusion, up * thickness, forward * thickness, OUT);
+    addCube(pos, right * thickness, up * extrusion, forward * thickness, OUT);
 };
 
 //

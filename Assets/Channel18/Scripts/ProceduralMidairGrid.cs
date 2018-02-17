@@ -14,26 +14,52 @@ namespace VJ.Channel18
     public class ProceduralMidairGrid : ProceduralGrid {
 
         [SerializeField, Range(0f, 1f)] protected float extrusion = 0.05f, thickness = 0.001f;
+        [SerializeField, Range(0f, 1f)] protected float throttle = 0.5f;
 
         protected ComputeBuffer supportBuffer;
 
-        [StructLayout(LayoutKind.Sequential)]
-        protected struct SupportData_t
-        {
-            bool flag;
-            Vector3 axis;
-        };
+        protected Kernel updateKer, 
+            setupInitKer, initKer,
+            setupRotKer, rotKer, autoRotKer;
 
+        protected const string kSupportDataKey = "_SupportData";
         protected const string kExtrusionKey = "_Extrusion", kThicknessKey = "_Thickness";
+        protected const string kThrottleKey = "_Throttle";
+
+        Coroutine animationCo;
 
         protected override void Start ()
         {
             base.Start();
+
+            supportBuffer = new ComputeBuffer(instancesCount, Marshal.SizeOf(typeof(SupportData_t)));
+            var supportData = new SupportData_t[instancesCount];
+            supportBuffer.SetData(supportData);
+
+            updateKer = new Kernel(compute, "Update");
+
+            setupInitKer = new Kernel(compute, "SetupInit");
+            initKer = new Kernel(compute, "Init");
+            setupRotKer = new Kernel(compute, "SetupRotate");
+            rotKer = new Kernel(compute, "Rotate");
+            autoRotKer = new Kernel(compute, "RotateAuto");
         }
 
         protected virtual void Update ()
         {
+            Compute(autoRotKer, Time.deltaTime * 5f);
+            Compute(updateKer, Time.deltaTime);
             Render();
+        }
+
+        protected override void OnDestroy ()
+        {
+            base.OnDestroy();
+            if(supportBuffer != null)
+            {
+                supportBuffer.Release();
+                supportBuffer = null;
+            }
         }
 
         protected override void Render()
@@ -42,6 +68,51 @@ namespace VJ.Channel18
             render.SetFloat(kExtrusionKey, extrusion);
             render.SetFloat(kThicknessKey, thickness);
             Graphics.DrawMesh(mesh, transform.localToWorldMatrix, render, 0, null, 0, null, shadowCasting, receiveShadow);
+        }
+
+        protected override void Compute(Kernel kernel, float dt)
+        {
+            compute.SetBuffer(kernel.Index, kSupportDataKey, supportBuffer);
+            compute.SetFloat(kThrottleKey, throttle);
+            base.Compute(kernel, dt);
+        }
+
+        public void Init()
+        {
+            Animate(setupInitKer, initKer);
+        }
+
+        public void Rotate()
+        {
+            Animate(setupRotKer, rotKer);
+        }
+
+        void Animate(Kernel setupKer, Kernel animateKer)
+        {
+            Compute(setupKer, Time.deltaTime);
+            if(animationCo != null)
+            {
+                StopCoroutine(animationCo);
+            }
+            animationCo = StartCoroutine(IAnimator(animateKer, 0.5f));
+        }
+
+        IEnumerator IAnimator(Kernel kernel, float duration)
+        {
+            yield return 0;
+
+            var time = 0f;
+            while(time < duration)
+            {
+                yield return 0;
+                var dt = Time.deltaTime;
+                time += dt;
+                compute.SetFloat("_T", time / duration);
+                Compute(kernel, dt);
+            }
+
+            compute.SetFloat("_T", 1f);
+            Compute(kernel, Time.deltaTime);
         }
 
         protected override Mesh Build()
@@ -203,6 +274,15 @@ namespace VJ.Channel18
                 }
             }
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        protected struct SupportData_t
+        {
+            float extrusion, thickness;
+            Quaternion prevRot, toRot;
+            float time;
+            bool flag;
+        };
 
     }
 

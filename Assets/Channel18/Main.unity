@@ -148,10 +148,11 @@ MonoBehaviour:
   compute: {fileID: 7200000, guid: f533876d301e0404daddc735f5208ac3, type: 3}
   shadowCasting: 1
   receiveShadow: 0
-  massMin: 0.5
+  massMin: 0.27
   massMax: 1
   extrusion: 0.1
   thickness: 0.015
+  throttle: 0.01
 --- !u!4 &28157039
 Transform:
   m_ObjectHideFlags: 0

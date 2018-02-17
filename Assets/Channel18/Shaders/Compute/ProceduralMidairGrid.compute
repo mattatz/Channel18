@@ -1,13 +1,25 @@
-﻿#pragma kernel Setup
+﻿#pragma kernel SetupInit
+#pragma kernel Init
 #pragma kernel Update
+#pragma kernel SetupRotate
 #pragma kernel Rotate
+#pragma kernel RotateAuto
 
 #define THREAD [numthreads(8,1,1)]
 #define DISCARD if((int)id.x >= _InstancesCount) return;
 
 #include "../Common/ProceduralGrid.cginc"
+#include "../Common/MidairSupport.cginc"
+#include "../Common/Random.cginc"
+#include "../Common/Quaternion.cginc"
+#include "../Common/Easing.cginc"
+
+#ifndef HALF_PI
+#define HALF_PI 1.57079632679
+#endif
 
 RWStructuredBuffer<Grid> _Grids;
+RWStructuredBuffer<Support> _SupportData;
 
 int _InstancesCount;
 int _Width, _Height, _Depth;
@@ -15,10 +27,17 @@ int _Width, _Height, _Depth;
 float4 _Time;
 float _DT;
 
+float _Throttle, _T;
 half4 _NoiseParams;
 
 THREAD
-void Setup (uint3 id : SV_DispatchThreadID)
+void SetupInit (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+}
+
+THREAD
+void Init (uint3 id : SV_DispatchThreadID)
 {
     DISCARD
 }
@@ -27,10 +46,71 @@ THREAD
 void Update (uint3 id : SV_DispatchThreadID)
 {
     DISCARD
+
+    Grid grid = _Grids[id.x];
+    grid.scale.x = (sin(_Time.y) + 1.0) * 0.5;
+    _Grids[id.x] = grid;
+}
+
+void SetupRotSupport(in Grid grid, inout Support sup, float2 seed) {
+    sup.prevRotation = grid.rotation;
+    sup.toRotation = qmul(grid.rotation, rotate_angle_axis(HALF_PI, random_orth(seed)));
+    sup.time = 0;
+}
+
+THREAD
+void SetupRotate (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+    Support sup = _SupportData[id.x];
+    float2 seed = id.xy + float2(0, _Time.x);
+    if (nrand(seed) < _Throttle) {
+        SetupRotSupport(grid, sup, seed);
+        sup.flag = true;
+    } else {
+        sup.flag = false;
+    }
+    _SupportData[id.x] = sup;
 }
 
 THREAD
 void Rotate (uint3 id : SV_DispatchThreadID)
 {
     DISCARD
+
+    Grid grid = _Grids[id.x];
+    Support support = _SupportData[id.x];
+    if (support.flag)
+    {
+        float speed = grid.mass;
+        float t = saturate(_T + _T * speed);
+        grid.rotation = q_slerp(support.prevRotation, support.toRotation, ease_out_quad(t));
+    }
+    _Grids[id.x] = grid;
 }
+
+THREAD
+void RotateAuto (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+    Support sup = _SupportData[id.x];
+    grid.rotation = q_slerp(sup.prevRotation, sup.toRotation, ease_out_quad(sup.time));
+    float2 seed = id.xy + float2(0, _Time.x);
+    if (sup.time <= 1.0) {
+        sup.time += _DT * grid.mass;
+    } else {
+        if (nrand(seed) < _Throttle)
+        {
+            SetupRotSupport(grid, sup, seed);
+        } else {
+            sup.prevRotation = sup.toRotation;
+        }
+    }
+    _SupportData[id.x] = sup;
+    _Grids[id.x] = grid;
+}
+
