@@ -117,6 +117,14 @@ float4x4 compose(float3 position, float4 quat, float3 scale)
     return m;
 }
 
+float4x4 compose_trs(float3 position, float4x4 rot, float3 scale)
+{
+    float4x4 m = rot;
+    m = m_scale(m, scale);
+    m = m_translate(m, position);
+    return m;
+}
+
 void decompose(in float4x4 m, out float3 position, out float4 rotation, out float3 scale)
 {
     float sx = length(float3(m[0][0], m[0][1], m[0][2]));

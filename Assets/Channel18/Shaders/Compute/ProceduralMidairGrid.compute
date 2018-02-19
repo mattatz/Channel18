@@ -48,7 +48,7 @@ void Update (uint3 id : SV_DispatchThreadID)
     DISCARD
 
     Grid grid = _Grids[id.x];
-    grid.scale.x = (sin(_Time.y) + 1.0) * 0.5;
+    // grid.scale.x = (sin(_Time.y) + 1.0) * 0.5;
     _Grids[id.x] = grid;
 }
 

@@ -47,7 +47,7 @@ namespace VJ.Channel18
 
         protected virtual void Update ()
         {
-            Compute(autoRotKer, Time.deltaTime * 5f);
+            // Compute(autoRotKer, Time.deltaTime * 5f);
             Compute(updateKer, Time.deltaTime);
             Render();
         }

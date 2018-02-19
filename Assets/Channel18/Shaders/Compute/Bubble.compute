@@ -1,0 +1,75 @@
+﻿#pragma kernel Init
+#pragma kernel Update
+
+#define THREAD [numthreads(8,1,1)]
+#define DISCARD if((int)id.x >= _InstancesCount) return;
+
+#include "../Common/Random.cginc"
+#include "../Common/Quaternion.cginc"
+#include "../Common/Easing.cginc"
+#include "../Common/Noise/SimplexNoiseGrad3D.cginc"
+#include "../Common/Bubble.cginc"
+
+#ifndef HALF_PI
+#define HALF_PI 1.57079632679
+#endif
+
+RWStructuredBuffer<Bubble> _Bubbles;
+
+int _InstancesCount;
+float3 _BoundsMin, _BoundsMax;
+float3 _Buoyancy;
+
+float4 _Time;
+float _DT;
+float _Decay;
+
+float _Throttle;
+half4 _NoiseParams;
+
+void Initialize(inout Bubble bub, uint3 id)
+{
+    float3 seed = float3(
+        nrand(id.xy + float2(44.167, 0) + float2(_Time.x, _DT)),
+        nrand(id.xy + float2(11.31, 0) + float2(_Time.x, _DT)),
+        nrand(id.xy + float2(9.367, 0) + float2(_Time.x, _DT))
+    );
+    bub.position.xyz = float3(
+        lerp(_BoundsMin.x, _BoundsMax.x, seed.x),
+        lerp(_BoundsMin.y, _BoundsMax.y, seed.y),
+        lerp(_BoundsMin.z, _BoundsMax.z, seed.z)
+    );
+    bub.velocity = float3(0, 0, 0);
+    bub.lifetime = 1;
+}
+
+THREAD
+void Init (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+}
+
+THREAD
+void Update (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Bubble bub = _Bubbles[id.x];
+    bub.lifetime -= _DT * bub.mass * _Decay;
+    if (bub.lifetime < 0.0) {
+        Initialize(bub, id);
+    }
+
+    float3 v = bub.velocity.xyz;
+    v.xyz += _Buoyancy.xyz * _DT * bub.mass;
+    float3 seed = bub.position.xyz;
+    float3 np = seed * _NoiseParams.x;
+    float3 n1 = snoise_grad(np);
+    float3 n2 = snoise_grad(np + float3(21.83, 13.28, 7.32));
+    v.xyz += cross(n1, n2) * _NoiseParams.y * bub.mass;
+    bub.velocity.xyz = v.xyz;
+
+    bub.position.xyz += bub.velocity.xyz * _DT * bub.mass;
+    _Bubbles[id.x] = bub;
+}
+

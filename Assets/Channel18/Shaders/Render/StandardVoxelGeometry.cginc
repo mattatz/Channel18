@@ -20,22 +20,19 @@ float4 _MainTex_ST;
 half _Glossiness;
 half _Metallic;
 
-half _Extrusion, _Thickness;
-
 float _Size;
 
 #include "../Common/Quaternion.cginc"
-#include "../Common/Matrix.cginc"
-#include "../Common/ProceduralGrid.cginc"
+#include "../Common/VoxelParticle.cginc"
 
-StructuredBuffer<Grid> _Grids;
+StructuredBuffer<VParticle> _ParticleBuffer;
 
 // Vertex input attributes
 struct Attributes
 {
     float4 position : POSITION;
     float4 rotation : TANGENT;
-    float2 scale : NORMAL;
+    float3 size : NORMAL;
 };
 
 // Fragment varyings
@@ -46,13 +43,17 @@ struct Varyings
 #if defined(PASS_CUBE_SHADOWCASTER)
     // Cube map shadow caster pass
     float3 shadow : TEXCOORD0;
+
 #elif defined(UNITY_PASS_SHADOWCASTER)
     // Default shadow caster pass
+
 #else
     // GBuffer construction pass
     float3 normal : NORMAL;
+    float2 texcoord : TEXCOORD0;
     half3 ambient : TEXCOORD1;
     float3 wpos : TEXCOORD2;
+
 #endif
 };
 
@@ -62,10 +63,10 @@ struct Varyings
 
 Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 {
-    Grid grid = _Grids[vid];
-    input.position.xyz = grid.position.xyz;
-    input.rotation = grid.rotation;
-    input.scale.xy = grid.scale.xy;
+    VParticle particle = _ParticleBuffer[vid];
+    input.position = float4(particle.position, 1);
+    input.size = particle.scale;
+    input.rotation = particle.rotation;
     return input;
 }
 
@@ -73,7 +74,7 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 // Geometry stage
 //
 
-Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
+Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm, float2 texcoord)
 {
     float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
 
@@ -92,6 +93,7 @@ Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
     // GBuffer construction pass
     o.position = UnityWorldToClipPos(float4(wpos, 1));
     o.normal = wnrm;
+    o.texcoord = texcoord;
     o.ambient = ShadeSHPerVertex(wnrm, 0);
     o.wpos = wpos;
 #endif
@@ -102,22 +104,31 @@ Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
 void addFace (inout TriangleStream<Varyings> OUT, float4 p[4], float3 normal)
 {
     float3 wnrm = UnityObjectToWorldNormal(normal);
-    Varyings o = VertexOutput(o, p[0], wnrm);
+    Varyings o = VertexOutput(o, p[0], wnrm, float2(1.0f, 0.0f));
     OUT.Append(o);
 
-    o = VertexOutput(o, p[1], wnrm);
+    o = VertexOutput(o, p[1], wnrm, float2(1.0f, 1.0f));
     OUT.Append(o);
 
-    o = VertexOutput(o, p[2], wnrm);
+    o = VertexOutput(o, p[2], wnrm, float2(0.0f, 0.0f));
     OUT.Append(o);
 
-    o = VertexOutput(o, p[3], wnrm);
+    o = VertexOutput(o, p[3], wnrm, float2(0.0f, 1.0f));
     OUT.Append(o);
+
     OUT.RestartStrip();
 }
 
-void addCube(float3 pos, float3 right, float3 up, float3 forward, inout TriangleStream<Varyings> OUT)
-{
+[maxvertexcount(24)]
+void Geometry (point Attributes IN[1], inout TriangleStream<Varyings> OUT) {
+
+    float3 halfS = 0.5f * IN[0].size;
+
+    float3 pos = IN[0].position.xyz;
+    float3 right = rotate_vector(float3(1, 0, 0), IN[0].rotation) * halfS.x;
+    float3 up = rotate_vector(float3(0, 1, 0), IN[0].rotation) * halfS.y;
+    float3 forward = rotate_vector(float3(0, 0, 1), IN[0].rotation) * halfS.z;
+
     float4 v[4];
 
 	// forward
@@ -161,22 +172,6 @@ void addCube(float3 pos, float3 right, float3 up, float3 forward, inout Triangle
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos + forward + right - up, 1.0f);
     addFace(OUT, v, normalize(right));
-}
-
-[maxvertexcount(72)]
-void Geometry (point Attributes IN[1], inout TriangleStream<Varyings> OUT) {
-    float3 pos = IN[0].position.xyz;
-    float hs = _Size * 0.5f;
-    float3 right = rotate_vector(float3(1, 0, 0), IN[0].rotation) * hs;
-    float3 up = rotate_vector(float3(0, 1, 0), IN[0].rotation) * hs;
-    float3 forward = rotate_vector(float3(0, 0, 1), IN[0].rotation) * hs;
-
-    float extrusion = lerp(_Thickness, _Extrusion, IN[0].scale.x);
-    float thickness = min(_Thickness, _Extrusion) * IN[0].scale.y;
-
-    addCube(pos, right * thickness, up * thickness, forward * extrusion, OUT);
-    addCube(pos, right * extrusion, up * thickness, forward * thickness, OUT);
-    addCube(pos, right * thickness, up * extrusion, forward * thickness, OUT);
 };
 
 //
@@ -201,7 +196,8 @@ half4 Fragment() : SV_Target { return 0; }
 
 // GBuffer construction pass
 void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 outGBuffer1 : SV_Target1, out half4 outGBuffer2 : SV_Target2, out half4 outEmission : SV_Target3) {
-    half3 albedo = _Color.rgb;
+    // Sample textures
+    half3 albedo = tex2D(_MainTex, input.texcoord).rgb * _Color.rgb;
 
     // PBS workflow conversion (metallic -> specular)
     half3 c_diff, c_spec;
