@@ -7,12 +7,14 @@ namespace VJ.Channel18
 
     public class ProceduralFloorGrid : ProceduralGrid {
 
+        [SerializeField, Range(0f, 100f)] protected float plasticity = 10f;
         [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f, noiseIntensity = 3f;
         [SerializeField] protected float radius = 7.5f, thickness = 5f; 
 
         #region Shader property keys
 
         protected const string kNoiseParamsKey = "_NoiseParams";
+        protected const string kPlasticityKey = "_Plasticity";
         protected const string kRadiusKey = "_Radius";
 
         #endregion
@@ -28,6 +30,7 @@ namespace VJ.Channel18
 
         protected virtual void Update ()
         {
+            compute.SetFloat(kPlasticityKey, plasticity);
             Compute(updateKer, Time.deltaTime);
             Render();
         }
@@ -50,71 +53,114 @@ namespace VJ.Channel18
         }
 
         protected Mesh BuildCube(
-                float width = 1f, float height = 1f, float depth = 1f,
-                int widthSegments = 2, int heightSegments = 2, int depthSegments = 2
+                float width = 1f, float height = 1f, float depth = 1f
             )
         {
-            widthSegments = Mathf.Max(2, widthSegments);
-            heightSegments = Mathf.Max(2, heightSegments);
-            depthSegments = Mathf.Max(2, depthSegments);
-
             var mesh = new Mesh();
 
             var vertices = new List<Vector3>();
-            var uvs = new List<Vector2>();
             var triangles = new List<int>();
+            var normals = new List<Vector3>();
+            var tangents = new List<Vector4>();
 
             var hw = width * 0.5f;
             var hh = height * 0.5f;
             var hd = depth * 0.5f;
 
-            // front
-            CalculatePlane(
-                vertices, uvs, triangles,
-                Vector3.forward * -hd, Vector3.right * width, Vector3.up * height, widthSegments, heightSegments
-            );
+            var zero = Vector3.zero;
+            var forward = Vector3.forward;
+            var up = Vector3.up;
+            var right = Vector3.right;
 
-            // right
-            CalculatePlane(
-                vertices, uvs, triangles,
-                Vector3.right * hw, Vector3.forward * depth, Vector3.up * height, depthSegments, heightSegments
-            );
+            var hf = forward * hd;
+            var hu = up * hh * 0f; // crush vertically
+            var hr = right * hw;
 
-            // back
-            CalculatePlane(
-                vertices, uvs, triangles,
-                Vector3.forward * hd, Vector3.left * width, Vector3.up * height, widthSegments, heightSegments
-            );
-
-            // left
-            CalculatePlane(
-                vertices, uvs, triangles,
-                Vector3.right * -hw, Vector3.back * depth, Vector3.up * height, depthSegments, heightSegments
-            );
+            var v0 =  hf + hu + -hr;
+            var v1 = -hf + hu + -hr;
+            var v2 = -hf + hu +  hr;
+            var v3 =  hf + hu +  hr;
+            var v4 =  hf - hu + -hr;
+            var v5 = -hf - hu + -hr;
+            var v6 = -hf - hu +  hr;
+            var v7 =  hf - hu +  hr;
 
             // top
-            CalculatePlane(
-                vertices, uvs, triangles,
-                Vector3.up * hh, Vector3.right * width, Vector3.forward * depth, widthSegments, depthSegments
-            );
+            AddFace(v0, v3, v1, vertices, triangles);
+            tangents.Add(up); tangents.Add(up); tangents.Add(up);
+            normals.Add(up); normals.Add(up); normals.Add(up);
+
+            AddFace(v2, v1, v3, vertices, triangles);
+            tangents.Add(up); tangents.Add(up); tangents.Add(up);
+            normals.Add(up); normals.Add(up); normals.Add(up);
 
             // bottom
-            CalculatePlane(
-                vertices, uvs, triangles,
-                Vector3.up * -hh, Vector3.right * width, Vector3.back * depth, widthSegments, depthSegments
-            );
+            AddFace(v4, v5, v7, vertices, triangles);
+            tangents.Add(zero); tangents.Add(zero); tangents.Add(zero);
+            normals.Add(-up); normals.Add(-up); normals.Add(-up);
+
+            AddFace(v6, v7, v5, vertices, triangles);
+            tangents.Add(zero); tangents.Add(zero); tangents.Add(zero);
+            normals.Add(-up); normals.Add(-up); normals.Add(-up);
+
+            // front
+            AddFace(v0, v4, v3, vertices, triangles);
+            tangents.Add(up); tangents.Add(zero); tangents.Add(up);
+            normals.Add(forward); normals.Add(forward); normals.Add(forward);
+
+            AddFace(v7, v3, v4, vertices, triangles);
+            tangents.Add(zero); tangents.Add(up); tangents.Add(zero);
+            normals.Add(forward); normals.Add(forward); normals.Add(forward);
+
+            // back
+            AddFace(v1, v2, v5, vertices, triangles);
+            tangents.Add(up); tangents.Add(up); tangents.Add(zero);
+            normals.Add(-forward); normals.Add(-forward); normals.Add(-forward);
+
+            AddFace(v6, v5, v2, vertices, triangles);
+            tangents.Add(zero); tangents.Add(zero); tangents.Add(up);
+            normals.Add(-forward); normals.Add(-forward); normals.Add(-forward);
+
+            // right
+            AddFace(v3, v7, v2, vertices, triangles);
+            tangents.Add(up); tangents.Add(zero); tangents.Add(up);
+            normals.Add(right); normals.Add(right); normals.Add(right);
+
+            AddFace(v6, v2, v7, vertices, triangles);
+            tangents.Add(zero); tangents.Add(up); tangents.Add(zero);
+            normals.Add(right); normals.Add(right); normals.Add(right);
+
+            // left
+            AddFace(v1, v5, v0, vertices, triangles);
+            tangents.Add(up); tangents.Add(zero); tangents.Add(up);
+            normals.Add(-right); normals.Add(-right); normals.Add(-right);
+
+            AddFace(v4, v0, v5, vertices, triangles);
+            tangents.Add(zero); tangents.Add(up); tangents.Add(zero);
+            normals.Add(-right); normals.Add(-right); normals.Add(-right);
 
             mesh.vertices = vertices.ToArray();
-            mesh.uv = uvs.ToArray();
             mesh.SetTriangles(triangles.ToArray(), 0);
-            mesh.RecalculateNormals();
+            mesh.SetNormals(normals);
+            mesh.SetTangents(tangents);
             mesh.RecalculateBounds();
 
             return mesh;
         }
 
+        void AddFace(Vector3 p0, Vector3 p1, Vector3 p2, List<Vector3> vertices, List<int> triangles)
+        {
+            int triangleOffset = vertices.Count;
+            vertices.Add(p0);
+            vertices.Add(p1);
+            vertices.Add(p2);
+            triangles.Add(triangleOffset + 0);
+            triangles.Add(triangleOffset + 1);
+            triangles.Add(triangleOffset + 2);
+        }
+
         void CalculatePlane(
-            List<Vector3> vertices, List<Vector2> uvs, List<int> triangles,
+            List<Vector3> vertices, List<Vector2> uvs, List<Vector4> tangents, List<int> triangles,
             Vector3 origin, Vector3 right, Vector3 up, int rSegments = 2, int uSegments = 2
         )
         {
@@ -123,13 +169,17 @@ namespace VJ.Channel18
 
             int triangleOffset = vertices.Count;
 
+            var u = Vector3.up;
             for (int y = 0; y < uSegments; y++)
             {
                 float ru = y * uInv;
                 for (int x = 0; x < rSegments; x++)
                 {
                     float rr = x * rInv;
-                    vertices.Add(origin + right * (rr - 0.5f) + up * (ru - 0.5f));
+                    var v = right * (rr - 0.5f) + up * (ru - 0.5f);
+                    vertices.Add(origin + v);
+                    var t = u * (Vector3.Dot(v, u) >= 0.0f ? 1f : 0f);
+                    tangents.Add(t);
                     uvs.Add(new Vector2(rr, ru));
                 }
 

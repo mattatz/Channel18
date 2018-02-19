@@ -10,6 +10,7 @@
 	SubShader {
 		Tags { "RenderType"="Opaque" }
 		LOD 200
+        Cull Back
 
 		CGPROGRAM
 
@@ -51,7 +52,8 @@
         #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
             uint iid = unity_InstanceID;
             Grid grid = _Grids[iid];
-            unity_ObjectToWorld = mul(unity_ObjectToWorld, compose(grid.position.xyz, grid.rotation, grid.scale));
+            // unity_ObjectToWorld = mul(unity_ObjectToWorld, compose(grid.position.xyz, grid.rotation, grid.scale));
+            unity_ObjectToWorld = mul(unity_ObjectToWorld, compose(grid.position.xyz, grid.rotation, float3(1, 1, 1)));
             unity_WorldToObject = inverse(unity_ObjectToWorld);
         #endif
         }
@@ -60,8 +62,13 @@
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
 
-            // float l = (sin(_Time.y) + 1.0) * 0.25;
+            // float l = (sin(_Time.y) + 1.0);
             // IN.vertex.xyz += IN.tangent.xyz * l;
+        #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
+            uint iid = unity_InstanceID;
+            Grid grid = _Grids[iid];
+            IN.vertex.xyz += IN.tangent.xyz * max(0, grid.scale.y - 1);
+        #endif
         }
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
