@@ -1,5 +1,4 @@
-﻿
-#pragma kernel Setup
+﻿#pragma kernel Setup
 #pragma kernel Update
 
 #define THREAD [numthreads(8, 1, 1)]
@@ -134,6 +133,7 @@ void Update (uint3 id : SV_DispatchThreadID)
     Voxel v = _VoxelBuffer[vindex];
     uint3 p = GetPosition(vindex);
     VParticle particle = _ParticleBuffer[id.x];
+
     /*
     if (p.y <= _Threshold)
     {
@@ -153,7 +153,7 @@ void Update (uint3 id : SV_DispatchThreadID)
     float dt = _DT.x * particle.speed;
     particle.position = lerp(particle.position, v.position, dt);
     particle.velocity = lerp(particle.velocity, float3(0, 0, 0), dt);
-    particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * (float) v.flag, dt);
+    particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * (float)v.flag, dt);
     particle.rotation = q_slerp(particle.rotation, QUATERNION_IDENTITY, dt);
     _ParticleBuffer[id.x] = particle;
 }
