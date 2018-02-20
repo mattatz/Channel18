@@ -13,10 +13,28 @@ namespace VJ.Channel18
 {
 
     public class VoxelParticleSystem : MonoBehaviour {
-        
-        [SerializeField] protected ComputeShader voxelizer, voxelControl, particleUpdate;
+
+        protected enum ParticleMode
+        {
+            Immediate,
+            Delay
+        };
+
+        protected enum VoxelMode
+        {
+            Default,
+            Randomize,
+            Glitch
+        };
+
         [SerializeField] protected SkinnedMeshRenderer skin;
         [SerializeField] protected int count = 64;
+        [SerializeField] protected ComputeShader voxelizer, voxelControl, particleUpdate;
+        [SerializeField] protected ParticleMode particleMode = ParticleMode.Immediate;
+        [SerializeField] protected VoxelMode voxelMode = VoxelMode.Default;
+
+        protected Dictionary<ParticleMode, Kernel> particleKernels;
+        protected Dictionary<VoxelMode, Kernel> voxelKernels;
 
         #region Particle properties
 
@@ -34,6 +52,8 @@ namespace VJ.Channel18
 
         #endregion
 
+        [SerializeField, Range(0, 5f)] protected float delaySpeed = 1.5f;
+
         #region Voxel control properties
 
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.1f;
@@ -44,7 +64,7 @@ namespace VJ.Channel18
         protected GPUVoxelData data;
         protected Bounds bounds;
 
-        protected Kernel setupKer, updateKer;
+        protected Kernel setupKer, immediateKer, delayKer;
         protected Kernel randomizeKer, glitchKer;
 
         protected ComputeBuffer particleBuffer;
@@ -68,6 +88,7 @@ namespace VJ.Channel18
         protected const string kNoiseParamsKey = "_NoiseParams", kNoiseOffsetKey = "_NoiseOffset";
         protected const string kThresholdKey = "_Threshold";
         protected const string kThrottleKey = "_Throttle";
+        protected const string kDelaySpeed = "_DelaySpeed";
 
         #endregion
 
@@ -89,9 +110,13 @@ namespace VJ.Channel18
             renderer.GetPropertyBlock(block);
 
             setupKer = new Kernel(particleUpdate, "Setup");
-            updateKer = new Kernel(particleUpdate, "Update");
-            randomizeKer = new Kernel(voxelControl, "Randomize");
-            glitchKer = new Kernel(voxelControl, "Glitch");
+            particleKernels = new Dictionary<ParticleMode, Kernel>();
+            particleKernels.Add(ParticleMode.Immediate, new Kernel(particleUpdate, "Immediate"));
+            particleKernels.Add(ParticleMode.Delay, new Kernel(particleUpdate, "Delay"));
+
+            voxelKernels = new Dictionary<VoxelMode, Kernel>();
+            voxelKernels.Add(VoxelMode.Randomize, new Kernel(voxelControl, "Randomize"));
+            voxelKernels.Add(VoxelMode.Glitch, new Kernel(voxelControl, "Glitch"));
 
             Setup();
         }
@@ -99,8 +124,10 @@ namespace VJ.Channel18
         void Update () {
             cached = Sample();
             Voxelize(cached);
-
-            ComputeParticle(updateKer, Time.deltaTime);
+            if(voxelMode != VoxelMode.Default) {
+                ComputeVoxel(voxelKernels[voxelMode], 0f);
+            }
+            ComputeParticle(particleKernels[particleMode], Time.deltaTime);
 
             block.SetBuffer(kParticleBufferKey, particleBuffer);
             renderer.SetPropertyBlock(block);
@@ -208,19 +235,21 @@ namespace VJ.Channel18
             threshold = Mathf.Clamp01(threshold);
             particleUpdate.SetInt(kThresholdKey, Mathf.FloorToInt(threshold * data.Height));
 
+            particleUpdate.SetFloat(kDelaySpeed, delaySpeed);
+
             particleUpdate.Dispatch(kernel.Index, particleBuffer.count / (int)kernel.ThreadX + 1, (int)kernel.ThreadY, (int)kernel.ThreadZ);
         }
 
         public void Randomize()
         {
             Voxelize(cached);
-            ComputeVoxel(randomizeKer, 0f);
+            ComputeVoxel(voxelKernels[VoxelMode.Randomize], 0f);
         }
 
         public void Glitch()
         {
             Voxelize(cached);
-            ComputeVoxel(glitchKer, 0f);
+            ComputeVoxel(voxelKernels[VoxelMode.Glitch], 0f);
         }
 
         Mesh BuildPoints(GPUVoxelData data)
@@ -234,6 +263,7 @@ namespace VJ.Channel18
             mesh.vertices = new Vector3[count];
             mesh.SetIndices(indices, MeshTopology.Points, 0);
             mesh.RecalculateBounds();
+            mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000f);
             return mesh;
         }
 

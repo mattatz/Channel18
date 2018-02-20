@@ -63,13 +63,14 @@ void Glitch (uint3 id : SV_DispatchThreadID)
     if(x >= _Width) return;
     if(y >= _Height) return;
 
+    float seed = nrand(id.xy);
+
     for (int z = 0; z < _Depth; z++)
     {
         uint vid = get_voxel_index(x, y, z);
         Voxel v = _VoxelBuffer[vid];
         if (v.flag)
         {
-            float seed = nrand(id.xy + float2(z, _Time.y));
             if (seed < _Throttle) {
                 for (int z2 = z; z2 < _Depth; z2++)
                 {

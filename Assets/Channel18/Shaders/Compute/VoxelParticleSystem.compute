@@ -1,5 +1,6 @@
 ﻿#pragma kernel Setup
-#pragma kernel Update
+#pragma kernel Immediate
+#pragma kernel Delay
 
 #define THREAD [numthreads(8, 1, 1)]
 #define DISCARD_OVERFLOW if (id.x >= _ParticleCount) return;
@@ -10,7 +11,7 @@
 #include "../Common/Noise/SimplexNoiseGrad3D.cginc"
 #include "../Common/VoxelParticle.cginc"
 
-int _Width, _Height, _Depth;
+uint _Width, _Height, _Depth;
 float _UnitLength;
 
 StructuredBuffer<Voxel> _VoxelBuffer;
@@ -125,7 +126,7 @@ void Setup (uint3 id : SV_DispatchThreadID)
 }
 
 THREAD
-void Update (uint3 id : SV_DispatchThreadID)
+void Immediate (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
@@ -134,24 +135,28 @@ void Update (uint3 id : SV_DispatchThreadID)
     uint3 p = GetPosition(vindex);
     VParticle particle = _ParticleBuffer[id.x];
 
-    /*
-    if (p.y <= _Threshold)
-    {
-        float dt = _DT.x * particle.speed;
-        particle.position = lerp(particle.position, v.position, dt);
-        particle.velocity = lerp(particle.velocity, float3(0, 0, 0), dt);
-        particle.rotation = q_slerp(particle.rotation, QUATERNION_IDENTITY, dt);
-    }
-    else
-    {
-        particle = UpdatePosition(particle, id.xy);
-        particle = UpdateVelocity(particle, id.xy);
-        particle = UpdateRotation(particle, id.xy);
-    }
-    */
+    particle.position = v.position;
+    particle.velocity = float3(0, 0, 0);
+    particle.scale = float3(1, 1, 1) * lerp(0, _UnitLength, (float)v.flag);
+    particle.rotation = QUATERNION_IDENTITY;
+    _ParticleBuffer[id.x] = particle;
+}
 
-    float dt = _DT.x * particle.speed;
-    particle.position = lerp(particle.position, v.position, dt);
+half _DelaySpeed;
+
+THREAD
+void Delay (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD_OVERFLOW
+
+    uint vindex = id.x;
+    Voxel v = _VoxelBuffer[vindex];
+    uint3 p = GetPosition(vindex);
+    VParticle particle = _ParticleBuffer[id.x];
+
+    float dt = saturate(_DT.x * particle.speed * _DelaySpeed);
+    // particle.position = lerp(particle.position, v.position, dt);
+    particle.position = v.position;
     particle.velocity = lerp(particle.velocity, float3(0, 0, 0), dt);
     particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * (float)v.flag, dt);
     particle.rotation = q_slerp(particle.rotation, QUATERNION_IDENTITY, dt);
