@@ -15,7 +15,6 @@ int _Width, _Height, _Depth;
 float _UnitLength;
 
 StructuredBuffer<Voxel> _VoxelBuffer;
-StructuredBuffer<int> _IndexBuffer;
 
 RWStructuredBuffer<VParticle> _ParticleBuffer;
 uint _ParticleCount;
@@ -114,7 +113,7 @@ void Setup (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
-    int vindex = _IndexBuffer[id.x];
+    int vindex = id.x;
     Voxel v = _VoxelBuffer[vindex];
 
     VParticle particle;
@@ -131,10 +130,11 @@ void Update (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
-    uint vindex = _IndexBuffer[id.x];
+    uint vindex = id.x;
     Voxel v = _VoxelBuffer[vindex];
     uint3 p = GetPosition(vindex);
     VParticle particle = _ParticleBuffer[id.x];
+    /*
     if (p.y <= _Threshold)
     {
         float dt = _DT.x * particle.speed;
@@ -148,6 +148,13 @@ void Update (uint3 id : SV_DispatchThreadID)
         particle = UpdateVelocity(particle, id.xy);
         particle = UpdateRotation(particle, id.xy);
     }
+    */
+
+    float dt = _DT.x * particle.speed;
+    particle.position = lerp(particle.position, v.position, dt);
+    particle.velocity = lerp(particle.velocity, float3(0, 0, 0), dt);
+    particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * (float) v.flag, dt);
+    particle.rotation = q_slerp(particle.rotation, QUATERNION_IDENTITY, dt);
     _ParticleBuffer[id.x] = particle;
 }
 
