@@ -15,10 +15,7 @@ namespace VJ.Channel18
             base.OnInspectorGUI();
 
             var system = target as VoxelParticleSystem;
-            if(GUILayout.Button("Voxelize"))
-            {
-                system.Voxelize();
-            } else if(GUILayout.Button("Randomize"))
+            if(GUILayout.Button("Randomize"))
             {
                 system.Randomize();
             } else if(GUILayout.Button("Glitch"))

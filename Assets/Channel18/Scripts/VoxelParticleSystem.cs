@@ -14,8 +14,8 @@ namespace VJ.Channel18
 
     public class VoxelParticleSystem : MonoBehaviour {
         
-        [SerializeField] protected Mesh mesh;
         [SerializeField] protected ComputeShader voxelizer, voxelControl, particleUpdate;
+        [SerializeField] protected SkinnedMeshRenderer skin;
         [SerializeField] protected int count = 64;
 
         #region Particle properties
@@ -40,6 +40,7 @@ namespace VJ.Channel18
 
         #endregion
 
+        protected Mesh cached;
         protected GPUVoxelData data;
         protected Bounds bounds;
 
@@ -73,8 +74,9 @@ namespace VJ.Channel18
         #region MonoBehaviour functions
 
         void Start () {
-            bounds = mesh.bounds;
-            Voxelize();
+            cached = Sample();
+            bounds = cached.bounds;
+            Voxelize(cached);
 
             var pointMesh = BuildPoints(data);
             particleBuffer = new ComputeBuffer(pointMesh.vertexCount, Marshal.SizeOf(typeof(VoxelParticle_t)));
@@ -95,6 +97,9 @@ namespace VJ.Channel18
         }
       
         void Update () {
+            cached = Sample();
+            Voxelize(cached);
+
             ComputeParticle(updateKer, Time.deltaTime);
 
             block.SetBuffer(kParticleBufferKey, particleBuffer);
@@ -140,7 +145,7 @@ namespace VJ.Channel18
             return new Vector4(t / 4f, t, t * 2f, t * 3f);
         }
 
-        public void Voxelize()
+        public void Voxelize(Mesh mesh)
         {
             if(data != null)
             {
@@ -148,6 +153,13 @@ namespace VJ.Channel18
                 data = null;
             }
 			data = GPUVoxelizer.Voxelize(voxelizer, mesh, bounds, count, true, false);
+        }
+
+        Mesh Sample()
+        {
+            var mesh = new Mesh();
+            skin.BakeMesh(mesh);
+            return mesh;
         }
 
         void ComputeVoxel (Kernel kernel, float dt)
@@ -201,19 +213,18 @@ namespace VJ.Channel18
 
         public void Randomize()
         {
-            Voxelize();
+            Voxelize(cached);
             ComputeVoxel(randomizeKer, 0f);
         }
 
         public void Glitch()
         {
-            Voxelize();
+            Voxelize(cached);
             ComputeVoxel(glitchKer, 0f);
         }
 
         Mesh BuildPoints(GPUVoxelData data)
         {
-			var voxels = data.GetData();
             var count = data.Width * data.Height * data.Depth;
             var indices = new int[count];
             for (int i = 0; i < count; i++) indices[i] = i;
