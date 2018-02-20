@@ -166,6 +166,71 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &66377050
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 66377051}
+  - component: {fileID: 66377052}
+  m_Layer: 0
+  m_Name: Spotlight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &66377051
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 66377050}
+  m_LocalRotation: {x: 0.20591016, y: -0.08056854, z: 0.001994868, w: 0.97524655}
+  m_LocalPosition: {x: 17.9, y: 24.4, z: 7.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 759422192}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 23.7, y: -9.83, z: -1.833}
+--- !u!108 &66377052
+Light:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 66377050}
+  m_Enabled: 1
+  serializedVersion: 8
+  m_Type: 0
+  m_Color: {r: 1, g: 0.9699797, b: 0.88235295, a: 1}
+  m_Intensity: 0.24
+  m_Range: 300
+  m_SpotAngle: 80
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!1 &100928077
 GameObject:
   m_ObjectHideFlags: 0
@@ -181,7 +246,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &100928078
 Transform:
   m_ObjectHideFlags: 0
@@ -212,6 +277,7 @@ MonoBehaviour:
   bounds:
     m_Center: {x: 0, y: 8, z: 0}
     m_Extent: {x: 64, y: 16, z: 64}
+  throttle: 1
   sizeCurve:
     serializedVersion: 2
     m_Curve:
@@ -346,7 +412,7 @@ Light:
   serializedVersion: 8
   m_Type: 1
   m_Color: {r: 1, g: 0.97829986, b: 0.9191176, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.72
   m_Range: 10
   m_SpotAngle: 30
   m_CookieSize: 10
@@ -354,7 +420,7 @@ Light:
     m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.821
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
@@ -463,7 +529,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 21, z: -48.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 66377051}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -554,7 +621,7 @@ MeshRenderer:
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
+  m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 2100000, guid: d7a86ce9c4ec4264cb261f996fa21d01, type: 2}
@@ -669,7 +736,7 @@ MonoBehaviour:
   massMax: 1
   plasticity: 10
   noiseSpeed: 10
-  noiseScale: 0.0025
-  noiseIntensity: 20
+  noiseScale: 0.0015
+  noiseIntensity: 100
   radius: 1
   thickness: 10

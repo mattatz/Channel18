@@ -17,6 +17,8 @@
 RWStructuredBuffer<Bubble> _Bubbles;
 
 int _InstancesCount;
+float _Throttle;
+
 float3 _BoundsMin, _BoundsMax;
 float3 _Buoyancy;
 
@@ -24,7 +26,6 @@ float4 _Time;
 float _DT;
 float _Decay;
 
-float _Throttle;
 half4 _NoiseParams;
 
 void Initialize(inout Bubble bub, uint3 id)
@@ -56,7 +57,7 @@ void Update (uint3 id : SV_DispatchThreadID)
 
     Bubble bub = _Bubbles[id.x];
     bub.lifetime -= _DT * bub.mass * _Decay;
-    if (bub.lifetime < 0.0) {
+    if (bub.lifetime < 0.0 && nrand(id.xy) < _Throttle) {
         Initialize(bub, id);
     }
 

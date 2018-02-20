@@ -67,6 +67,7 @@ namespace VJ.Channel18
             render.SetBuffer(kGridsKey, gridBuffer);
             render.SetFloat(kExtrusionKey, extrusion);
             render.SetFloat(kThicknessKey, thickness);
+
             Graphics.DrawMesh(mesh, transform.localToWorldMatrix, render, 0, null, 0, null, shadowCasting, receiveShadow);
         }
 

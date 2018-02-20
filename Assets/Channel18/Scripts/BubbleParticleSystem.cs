@@ -16,6 +16,7 @@ namespace VJ.Channel18
         [SerializeField] protected ComputeShader particleUpdate;
         [SerializeField] protected Material render;
         [SerializeField] protected Bounds bounds;
+        [SerializeField, Range(0f, 1f)] protected float throttle = 1.0f;
         [SerializeField] AnimationCurve sizeCurve;
         [SerializeField, Range(0f, 1f)] protected float decay = 0.5f;
         [SerializeField, Range(0f, 1f)] protected float massMin = 0.25f, massMax = 1f;
@@ -29,7 +30,7 @@ namespace VJ.Channel18
         protected const string kBubblesKey = "_Bubbles";
         protected const string kTimeKey = "_Time", kDTKey = "_DT";
 
-        protected const string kInstancesCountKey = "_InstancesCount";
+        protected const string kInstancesCountKey = "_InstancesCount", kThrottleKey = "_Throttle";
         protected const string kBoundsMinKey = "_BoundsMin", kBoundsMaxKey = "_BoundsMax";
         protected const string kBuoyancyKey = "_Buoyancy";
         protected const string kDecayKey = "_Decay";
@@ -80,6 +81,7 @@ namespace VJ.Channel18
         {
             particleUpdate.SetBuffer(kernel.Index, kBubblesKey, bubbleBuffer);
             particleUpdate.SetInt(kInstancesCountKey, instancesCount);
+            particleUpdate.SetFloat(kThrottleKey, throttle);
             particleUpdate.SetVector(kTimeKey, new Vector4(t / 4f, t, t * 2f, t * 3f));
             particleUpdate.SetFloat(kDTKey, dt);
             particleUpdate.SetFloat(kDecayKey, decay);
