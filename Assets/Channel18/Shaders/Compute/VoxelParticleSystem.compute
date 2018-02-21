@@ -1,6 +1,7 @@
 ﻿#pragma kernel Setup
 #pragma kernel Immediate
 #pragma kernel Delay
+#pragma kernel Transform
 
 #define THREAD [numthreads(8, 1, 1)]
 #define DISCARD_OVERFLOW if (id.x >= _ParticleCount) return;
@@ -15,6 +16,7 @@ uint _Width, _Height, _Depth;
 float _UnitLength;
 
 StructuredBuffer<Voxel> _VoxelBuffer;
+uint _VoxelCount;
 
 RWStructuredBuffer<VParticle> _ParticleBuffer;
 uint _ParticleCount;
@@ -108,13 +110,25 @@ uint3 GetPosition(uint index) {
     return position;
 }
 
+Voxel GetVoxel(uint i) {
+    if (i < _VoxelCount)
+    {
+        return _VoxelBuffer[i];
+    }
+
+    Voxel v;
+    v.flag = false;
+    v.position = float3(0, 0, 0);
+    v.uv = float2(0, 0);
+    return v;
+}
+
 THREAD
 void Setup (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
-    int vindex = id.x;
-    Voxel v = _VoxelBuffer[vindex];
+    Voxel v = GetVoxel(id.x);
 
     VParticle particle;
     particle.position = v.position;
@@ -130,9 +144,7 @@ void Immediate (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
-    uint vindex = id.x;
-    Voxel v = _VoxelBuffer[vindex];
-    uint3 p = GetPosition(vindex);
+    Voxel v = GetVoxel(id.x);
     VParticle particle = _ParticleBuffer[id.x];
 
     particle.position = v.position;
@@ -142,21 +154,34 @@ void Immediate (uint3 id : SV_DispatchThreadID)
     _ParticleBuffer[id.x] = particle;
 }
 
-half _DelaySpeed;
+half _DelaySpeed, _TransformSpeed;
 
 THREAD
 void Delay (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
-    uint vindex = id.x;
-    Voxel v = _VoxelBuffer[vindex];
-    uint3 p = GetPosition(vindex);
+    Voxel v = GetVoxel(id.x);
     VParticle particle = _ParticleBuffer[id.x];
 
     float dt = saturate(_DT.x * particle.speed * _DelaySpeed);
-    // particle.position = lerp(particle.position, v.position, dt);
     particle.position = v.position;
+    particle.velocity = lerp(particle.velocity, float3(0, 0, 0), dt);
+    particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * (float)v.flag, dt);
+    particle.rotation = q_slerp(particle.rotation, QUATERNION_IDENTITY, dt);
+    _ParticleBuffer[id.x] = particle;
+}
+
+THREAD
+void Transform (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD_OVERFLOW
+
+    Voxel v = GetVoxel(id.x);
+    VParticle particle = _ParticleBuffer[id.x];
+
+    float dt = saturate(_DT.x * particle.speed * _TransformSpeed);
+    particle.position = lerp(particle.position, v.position, dt);
     particle.velocity = lerp(particle.velocity, float3(0, 0, 0), dt);
     particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * (float)v.flag, dt);
     particle.rotation = q_slerp(particle.rotation, QUATERNION_IDENTITY, dt);

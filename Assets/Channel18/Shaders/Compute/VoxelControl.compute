@@ -65,14 +65,14 @@ void Glitch (uint3 id : SV_DispatchThreadID)
 
     float seed = nrand(id.xy);
 
-    for (int z = 0; z < _Depth; z++)
+    for (int z = _Depth - 1; z >= 0; z--)
     {
         uint vid = get_voxel_index(x, y, z);
         Voxel v = _VoxelBuffer[vid];
         if (v.flag)
         {
             if (seed < _Throttle) {
-                for (int z2 = z; z2 < _Depth; z2++)
+                for (int z2 = z; z2 >= 0; z2--)
                 {
                     uint vid2 = get_voxel_index(x, y, z2);
                     Voxel v2 = _VoxelBuffer[vid2];
