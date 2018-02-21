@@ -125,7 +125,6 @@ namespace VJ.Channel18
         void SetupParticleKernels()
         {
             particleKernels = new Dictionary<ParticleMode, Kernel>();
-            var names = Enum.GetNames(typeof(ParticleMode));
             foreach(ParticleMode mode in Enum.GetValues(typeof(ParticleMode)))
             {
                 particleKernels.Add(mode, new Kernel(particleUpdate, Enum.GetName(typeof(ParticleMode), mode)));

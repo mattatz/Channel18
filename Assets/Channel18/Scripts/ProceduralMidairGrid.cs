@@ -13,6 +13,10 @@ namespace VJ.Channel18
 
     public class ProceduralMidairGrid : ProceduralGrid {
 
+        protected enum MidairMode
+        {
+        };
+
         [SerializeField, Range(0f, 1f)] protected float extrusion = 0.05f, thickness = 0.001f;
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.5f;
 
@@ -282,7 +286,7 @@ namespace VJ.Channel18
             float extrusion, thickness;
             Quaternion prevRot, toRot;
             float time;
-            bool flag;
+            int flag;
         };
 
     }

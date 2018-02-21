@@ -65,12 +65,11 @@ void SetupRotate (uint3 id : SV_DispatchThreadID)
 
     Grid grid = _Grids[id.x];
     Support sup = _SupportData[id.x];
-    float2 seed = id.xy + float2(0, _Time.x);
-    if (nrand(seed) < _Throttle) {
-        SetupRotSupport(grid, sup, seed);
-        sup.flag = true;
-    } else {
-        sup.flag = false;
+    float2 seed = id.xy + float2(0, _Time.y);
+    if ((sup.flag == 0) && nrand(seed) < _Throttle) {
+        float2 seed2 = id.yx + float2(_Time.y, _DT);
+        SetupRotSupport(grid, sup, seed2);
+        sup.flag = 1;
     }
     _SupportData[id.x] = sup;
 }
@@ -81,14 +80,16 @@ void Rotate (uint3 id : SV_DispatchThreadID)
     DISCARD
 
     Grid grid = _Grids[id.x];
-    Support support = _SupportData[id.x];
-    if (support.flag)
-    {
+    Support sup = _SupportData[id.x];
+    if (sup.flag == 1) {
         float speed = grid.mass;
-        float t = saturate(_T + _T * speed);
-        grid.rotation = q_slerp(support.prevRotation, support.toRotation, ease_out_quad(t));
+        float t = (_T + _T * speed);
+        float tt = ease_out_quad(saturate(t));
+        grid.rotation = q_slerp(sup.prevRotation, sup.toRotation, tt);
+        sup.flag = (t <= 1.0) ? 1 : 0;
     }
     _Grids[id.x] = grid;
+    _SupportData[id.x] = sup;
 }
 
 THREAD

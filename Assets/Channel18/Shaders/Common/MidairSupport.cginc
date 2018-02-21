@@ -7,7 +7,7 @@ struct Support
     float extrusion, thickness;
     float4 prevRotation, toRotation;
     float time;
-    bool flag;
+    int flag;
 };
 
 #endif
