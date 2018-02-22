@@ -75,6 +75,6 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Noise: {r: 1, g: 1, b: 0.01, a: -1}
-    - _Scale: {r: 25, g: 25, b: 25, a: -1}
+    - _Noise: {r: 1, g: -0.31, b: 0.7, a: -1}
+    - _Scale: {r: 1, g: 1, b: 1, a: -1}
     - _Step: {r: 2, g: 4, b: 8, a: 16}
