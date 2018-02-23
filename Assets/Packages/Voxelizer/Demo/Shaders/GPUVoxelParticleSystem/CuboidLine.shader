@@ -3,8 +3,7 @@
 
 	Properties
 	{
-        _Color ("Color", Color) = (1, 1, 1, 1)
-        _Intensity ("Intensity", Float) = 1.0
+        [HDR] _Color ("Color", Color) = (1, 1, 1, 1)
         _Thickness ("Thickness", Float) = 0.1
 	}
 
@@ -24,11 +23,9 @@
 			#pragma geometry geom
 			#pragma fragment frag
 
-            half _Intensity;
-
 			float4 frag (g2f i) : SV_Target
 			{
-				return _Color * _Intensity;
+				return _Color;
 			}
 
 			ENDCG

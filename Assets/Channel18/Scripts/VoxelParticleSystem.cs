@@ -15,11 +15,27 @@ namespace VJ.Channel18
 
     public class VoxelParticleSystem : MonoBehaviour {
 
+        #region Accessors
+
+        public Bounds BaseClipBounds {
+            get { return baseClipBounds; }
+        }
+
+        public Bounds ClipBounds {
+            get { return clipBounds; }
+            set { clipBounds = value; }
+        }
+
+        #endregion
+
+        #region Enums
+
         protected enum ParticleMode
         {
             Immediate,
             Delay,
-            Transform
+            Transform,
+            Clip
         };
 
         protected enum VoxelMode
@@ -28,6 +44,8 @@ namespace VJ.Channel18
             Randomize,
             Glitch
         };
+
+        #endregion
 
         [SerializeField] protected SkinnedMeshRenderer skin;
         [SerializeField] protected int resolution = 128;
@@ -56,7 +74,8 @@ namespace VJ.Channel18
         #endregion
 
         [SerializeField, Range(1, 10)] protected int frame = 1;
-        [SerializeField, Range(0, 50f)] protected float delaySpeed = 1.5f, transformSpeed = 1.5f;
+        [SerializeField, Range(0, 50f)] protected float delaySpeed = 1.5f, transformSpeed = 1.5f, clipSpeed = 1.5f;
+        [SerializeField] protected Bounds baseClipBounds, clipBounds;
 
         #region Voxel control properties
 
@@ -66,7 +85,7 @@ namespace VJ.Channel18
 
         protected Mesh cached;
         protected GPUVoxelData data;
-        [SerializeField] protected Bounds bounds;
+        protected Bounds bounds;
 
         protected Kernel setupKer, immediateKer, delayKer;
         protected Kernel randomizeKer, glitchKer;
@@ -92,7 +111,8 @@ namespace VJ.Channel18
         protected const string kNoiseParamsKey = "_NoiseParams", kNoiseOffsetKey = "_NoiseOffset";
         protected const string kThresholdKey = "_Threshold";
         protected const string kThrottleKey = "_Throttle";
-        protected const string kDelaySpeedKey = "_DelaySpeed", kTransformSpeedKey = "_TransformSpeed";
+        protected const string kDelaySpeedKey = "_DelaySpeed", kTransformSpeedKey = "_TransformSpeed", kClipSpeedKey = "_ClipSpeed";
+        protected const string kClipMinKey = "_ClipMin", kClipMaxKey = "_ClipMax";
 
         #endregion
 
@@ -263,6 +283,9 @@ namespace VJ.Channel18
 
             particleUpdate.SetFloat(kDelaySpeedKey, delaySpeed);
             particleUpdate.SetFloat(kTransformSpeedKey, transformSpeed);
+            particleUpdate.SetFloat(kClipSpeedKey, clipSpeed);
+            particleUpdate.SetVector(kClipMinKey, clipBounds.min);
+            particleUpdate.SetVector(kClipMaxKey, clipBounds.max);
 
             particleUpdate.Dispatch(kernel.Index, particleBuffer.count / (int)kernel.ThreadX + 1, (int)kernel.ThreadY, (int)kernel.ThreadZ);
         }

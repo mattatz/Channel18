@@ -33,6 +33,8 @@ namespace VJ.Channel18
             compute.SetFloat(kPlasticityKey, plasticity);
             Compute(updateKer, Time.deltaTime);
             Render();
+
+            // if(Time.frameCount % 180 == 0) Noise();
         }
 
         protected override void Compute(Kernel kernel, float dt = 0f)

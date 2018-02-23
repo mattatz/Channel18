@@ -2,6 +2,7 @@
 #pragma kernel Immediate
 #pragma kernel Delay
 #pragma kernel Transform
+#pragma kernel Clip
 
 #define THREAD [numthreads(8, 1, 1)]
 #define DISCARD_OVERFLOW if (id.x >= _ParticleCount) return;
@@ -154,7 +155,7 @@ void Immediate (uint3 id : SV_DispatchThreadID)
     _ParticleBuffer[id.x] = particle;
 }
 
-half _DelaySpeed, _TransformSpeed;
+half _DelaySpeed, _TransformSpeed, _ClipSpeed;
 
 THREAD
 void Delay (uint3 id : SV_DispatchThreadID)
@@ -185,6 +186,30 @@ void Transform (uint3 id : SV_DispatchThreadID)
     particle.velocity = lerp(particle.velocity, float3(0, 0, 0), dt);
     particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * (float)v.flag, dt);
     particle.rotation = q_slerp(particle.rotation, QUATERNION_IDENTITY, dt);
+    _ParticleBuffer[id.x] = particle;
+}
+
+float3 _ClipMin, _ClipMax;
+
+THREAD
+void Clip (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD_OVERFLOW
+
+
+    Voxel v = GetVoxel(id.x);
+    VParticle particle = _ParticleBuffer[id.x];
+    
+    float dt = saturate(_DT.x * particle.speed * _ClipSpeed);
+
+    float min = step(_ClipMin.x, v.position.x) * step(_ClipMin.y, v.position.y) * step(_ClipMin.z, v.position.z);
+    float max = step(v.position.x, _ClipMax.x) * step(v.position.y, _ClipMax.y) * step(v.position.z, _ClipMax.z);
+    float flag = (float) v.flag * min * max;
+
+    particle.position = v.position;
+    particle.velocity = float3(0, 0, 0);
+    particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * flag, dt);
+    particle.rotation = QUATERNION_IDENTITY;
     _ParticleBuffer[id.x] = particle;
 }
 
