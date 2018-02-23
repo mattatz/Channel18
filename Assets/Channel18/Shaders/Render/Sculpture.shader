@@ -18,11 +18,52 @@
 
     #include "UnityCG.cginc"
     #include "UnityStandardCore.cginc"
+    #include "../Common/Noise/SimplexNoise3D.cginc"
 
     float3 _Scale;
     float3 _Noise;
     float4 _Step;
     float _CutoutDistance;
+
+    float3 GetCameraPosition()
+    {
+        return _WorldSpaceCameraPos;
+    }
+
+    float3 GetCameraForward()
+    {
+        return -UNITY_MATRIX_V[2].xyz;
+    }
+
+    float3 GetCameraUp()
+    {
+        return UNITY_MATRIX_V[1].xyz;
+    }
+
+    float3 GetCameraRight()
+    {
+        return UNITY_MATRIX_V[0].xyz;
+    }
+
+    float GetCameraFocalLength()
+    {
+        return abs(UNITY_MATRIX_P[1][1]);
+    }
+
+    float2 GetScreenSize()
+    {
+        return _ScreenParams.xy;
+    }
+
+    float2 GetPixelSize()
+    {
+        return _ScreenParams.zw - 1.0;
+    }
+
+    float GetAspectRatio()
+    {
+        return _ScreenParams.x / _ScreenParams.y;
+    }
 
     struct appdata
     {
@@ -32,14 +73,14 @@
     struct v2f
     {
         float4 vertex : SV_POSITION;
-        float3 world : NORMAL;
+        float4 spos : NORMAL;
     };
     
     v2f vert (appdata IN)
     {
         v2f OUT;
         OUT.vertex = UnityObjectToClipPos(IN.vertex);
-        OUT.world = mul(unity_ObjectToWorld, IN.vertex).xyz;
+        OUT.spos = OUT.vertex;
         return OUT;
     }
 
@@ -58,14 +99,6 @@
         float depth : SV_Depth;
     };
 
-    float3 GetCameraPosition() {
-        return _WorldSpaceCameraPos;
-    }
-
-    float3 GetCameraForward() {
-        return -UNITY_MATRIX_V[2].xyz;
-    }
-
     float3 localize(float3 p)
     {
         p = mul(unity_WorldToObject, float4(p, 1)).xyz * _Scale.xyz;
@@ -73,51 +106,45 @@
     }
 
     // https://www.shadertoy.com/view/XtjSDK
-    float4 grow = float4(1.0, 1.0, 1.0, 1.0);
-
-    float3 vsin(float3 seed, float s)
-    {
-        // return float3(sin(seed.x * s), sin(seed.y * s), sin(seed.z * s));
-        return s * sin(seed);
-    }
-
     float3 mapP(float3 p)
     {
-        float3 seed = p;
-        seed.xyz *= _Noise.x;
-
-        float4 scales = float4(1.0, 0.5, 0.25, 0.05) * _Noise.y;
-        p.xyz += scales.x * vsin(seed.yzx, _Step.x) * grow.x;
-        p.xyz += scales.y * vsin(seed.yzx, _Step.y) * grow.y;
-        p.xyz += scales.z * vsin(seed.yzx, _Step.z) * grow.z;
-        p.xyz += scales.w * vsin(seed.yzx, _Step.w) * grow.w;
-        return p;
+        float3 v = float3(0, 0, 0);
+        float3 seed = p.yzx * _Noise.x;
+        v.xyz += sin(seed * 2.0).xyz;
+        v.xyz += sin(seed * 4.0).xyz * 0.5;
+        // v.xyz += sin(seed * 8.0).xyz * 0.25;
+        // v.xyz += sin(seed * 16.0).xyz * 0.05;
+        return p + v.xyz * _Noise.y;
     }
 
     float map(float3 q)
     {
         q = localize(q);
+        // float3 p = q;
         float3 p = mapP(q);
-        float d = length(p) - 0.35 * _Scale.x;
+        float d = length(p) - 0.15 * _Scale.x;
         return d * _Noise.z;
     }
 
     float3 guess_normal(float3 p)
     {
-        const float d = 0.001;
+        const float d = 0.0001;
         return normalize(float3(
             map(p + float3(d, 0.0, 0.0)) - map(p + float3(-d, 0.0, 0.0)),
             map(p + float3(0.0, d, 0.0)) - map(p + float3(0.0, -d, 0.0)),
             map(p + float3(0.0, 0.0, d)) - map(p + float3(0.0, 0.0, -d))));
     }
 
-    void raymarching(float3 world, const int num_steps, inout float o_total_distance, out float o_num_steps, out float o_last_distance, out float3 o_raypos)
+    void raymarching(float2 pos, const int num_steps, inout float o_total_distance, out float o_num_steps, out float o_last_distance, out float3 o_raypos)
     {
         float3 cam_pos = GetCameraPosition();
+        float3 cam_forward = GetCameraForward();
+        float3 cam_up = GetCameraUp();
+        float3 cam_right = GetCameraRight();
+        float cam_focal_len = GetCameraFocalLength();
 
-        float3 ray_dir = normalize(world - GetCameraPosition());
-        o_raypos = world;
-
+        float3 ray_dir = normalize(cam_right * pos.x + cam_up * pos.y + cam_forward * cam_focal_len);
+        o_raypos = cam_pos;
         o_num_steps = 0.0;
         o_last_distance = 0.0;
         for (int i = 0; i < num_steps; i++)
@@ -148,13 +175,19 @@
                             
     gbuffer_out frag (v2f IN)
     {
-        grow = smoothstep(0.0, 1.0, (_Time.y - float4(0, 1, 2, 3)) / 3.0);
+        float2 spos = IN.spos.xy / IN.spos.w;
+#if UNITY_UV_STARTS_AT_TOP
+        spos.y *= -1.0;
+#endif
+        float2 coord = spos.xy;
+        coord.x *= GetAspectRatio();
 
         float num_steps = 1.0;
         float last_distance = 0.0;
         float total_distance = _ProjectionParams.y;
         float3 ray_pos;
-        raymarching(IN.world, 60, total_distance, num_steps, last_distance, ray_pos);
+        // raymarching(IN.world, 60, total_distance, num_steps, last_distance, ray_pos);
+        raymarching(spos.xy, 60, total_distance, num_steps, last_distance, ray_pos);
         float3 normal = guess_normal(ray_pos);
 
         gbuffer_out OUT;
