@@ -49,6 +49,7 @@ namespace VJ.Channel18
 
         [SerializeField] protected SkinnedMeshRenderer skin;
         [SerializeField] protected int resolution = 128;
+        [SerializeField, Range(0, 5)] protected int level = 0;
         [SerializeField] protected int count = 262144;
         [SerializeField] protected ComputeShader voxelizer, voxelControl, particleUpdate;
         [SerializeField] protected ParticleMode particleMode = ParticleMode.Immediate;
@@ -101,6 +102,7 @@ namespace VJ.Channel18
         protected const string kParticleBufferKey = "_ParticleBuffer", kParticleCountKey = "_ParticleCount";
 		protected const string kStartKey = "_Start", kEndKey = "_End", kSizeKey = "_Size";
         protected const string kWidthKey = "_Width", kHeightKey = "_Height", kDepthKey = "_Depth";
+        protected const string kLevelKey = "_Level";
         protected const string kUnitLengthKey = "_UnitLength", kInvUnitLengthKey = "_InvUnitLength", kHalfUnitLengthKey = "_HalfUnitLength";
 
         protected const string kTimeKey = "_Time", kDTKey = "_DT";
@@ -196,6 +198,7 @@ namespace VJ.Channel18
             particleUpdate.SetInt(kVoxelCountKey, data.Width * data.Height * data.Depth);
             particleUpdate.SetInt(kWidthKey, data.Width);
             particleUpdate.SetInt(kHeightKey, data.Height);
+            particleUpdate.SetInt(kLevelKey, level);
             particleUpdate.SetInt(kDepthKey, data.Depth);
 
             particleUpdate.SetBuffer(setupKer.Index, kParticleBufferKey, particleBuffer);
@@ -220,7 +223,7 @@ namespace VJ.Channel18
                 data = null;
             }
 			// data = GPUVoxelizer.Voxelize(voxelizer, mesh, mesh.bounds, resolution, true, false);
-			data = GPUVoxelizer.Voxelize(voxelizer, mesh, bounds, resolution, true, false);
+			data = GPUVoxelizer.Voxelize(voxelizer, mesh, bounds, resolution >> level, true, false);
         }
 
         Mesh Sample()
@@ -261,6 +264,8 @@ namespace VJ.Channel18
             particleUpdate.SetInt(kWidthKey, data.Width);
             particleUpdate.SetInt(kHeightKey, data.Height);
             particleUpdate.SetInt(kDepthKey, data.Depth);
+            particleUpdate.SetInt(kLevelKey, level);
+            particleUpdate.SetFloat(kUnitLengthKey, data.UnitLength);
 
             particleUpdate.SetBuffer(kernel.Index, kParticleBufferKey, particleBuffer);
             particleUpdate.SetInt(kParticleCountKey, particleBuffer.count);

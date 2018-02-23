@@ -893,12 +893,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   x:
+    enabled: 0
     min: {fileID: 875914627}
     max: {fileID: 426212373}
   y:
+    enabled: 0
     min: {fileID: 1992209506}
     max: {fileID: 711159279}
   z:
+    enabled: 0
     min: {fileID: 1246479305}
     max: {fileID: 634477494}
 --- !u!1 &875914624
@@ -1011,6 +1014,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skin: {fileID: 222416520}
   resolution: 82
+  level: 0
   count: 262144
   voxelizer: {fileID: 7200000, guid: 5fdfd9c0be0cd42fca24f981cc152dd4, type: 3}
   voxelControl: {fileID: 7200000, guid: 1a72af1e17cd6c746ad09aa5137ba00b, type: 3}

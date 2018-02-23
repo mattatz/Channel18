@@ -15,6 +15,7 @@
 
 uint _Width, _Height, _Depth;
 float _UnitLength;
+int _Level;
 
 StructuredBuffer<Voxel> _VoxelBuffer;
 uint _VoxelCount;
@@ -111,9 +112,13 @@ uint3 GetPosition(uint index) {
     return position;
 }
 
+uint GetIndex(uint3 position, uint width, uint height, uint depth)
+{
+    return position.x + position.y * width + position.z * (width * height);
+}
+
 Voxel GetVoxel(uint i) {
-    if (i < _VoxelCount)
-    {
+    if (i < _VoxelCount) {
         return _VoxelBuffer[i];
     }
 
@@ -123,6 +128,27 @@ Voxel GetVoxel(uint i) {
     v.uv = float2(0, 0);
     return v;
 }
+
+/*
+bool DownSample(uint id, uint level, out uint index)
+{
+    uint3 p = GetPosition(id);
+    uint w = _Width >> level;
+    uint h = _Height >> level;
+    uint d = _Depth >> level;
+    uint x = p.x >> level;
+    uint y = p.y >> level;
+    uint z = p.z >> level;
+
+    index = GetIndex(uint3(x, y, z), w, h, d);
+
+    uint div = uint(pow(2, level));
+    uint rx = p.x % div;
+    uint ry = p.y % div;
+    uint rz = p.z % div;
+    return (rx == 0 && ry == 0 && rz == 0) && (x < w && y < h && z < d);
+}
+*/
 
 THREAD
 void Setup (uint3 id : SV_DispatchThreadID)
