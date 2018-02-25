@@ -35,7 +35,8 @@ namespace VJ.Channel18
             Immediate,
             Delay,
             Transform,
-            Clip
+            Clip,
+            Flow
         };
 
         protected enum VoxelMode
@@ -62,14 +63,13 @@ namespace VJ.Channel18
 
         [SerializeField] protected float speedScaleMin = 2.0f, speedScaleMax = 5.0f;
         [SerializeField] protected float speedLimit = 1.0f;
-        [SerializeField, Range(0, 15)] protected float drag = 0.1f;
+        [SerializeField, Range(0f, 3f)] protected float drag = 0.1f;
         [SerializeField] protected Vector3 gravity = Vector3.zero;
         [SerializeField] protected float speedToSpin = 60.0f;
         [SerializeField] protected float maxSpin = 20.0f;
         [SerializeField] protected float noiseAmplitude = 1.0f;
         [SerializeField] protected float noiseFrequency = 0.01f;
         [SerializeField] protected float noiseMotion = 1.0f;
-        [SerializeField, Range(0f, 1f)] protected float threshold = 0f;
         protected Vector3 noiseOffset;
 
         #endregion
@@ -170,9 +170,6 @@ namespace VJ.Channel18
             ComputeParticle(particleKernels[particleMode], Time.deltaTime);
             block.SetBuffer(kParticleBufferKey, particleBuffer);
             renderer.SetPropertyBlock(block);
-
-            var t = Time.timeSinceLevelLoad;
-            threshold = (Mathf.Cos(t * 0.5f) + 1.0f) * 0.5f;
         }
 
         void OnDestroy ()
@@ -282,9 +279,6 @@ namespace VJ.Channel18
             var noiseDir = (gravity == Vector3.zero) ? Vector3.up : gravity.normalized;
             noiseOffset += noiseDir * noiseMotion * dt;
             particleUpdate.SetVector(kNoiseOffsetKey, noiseOffset);
-
-            threshold = Mathf.Clamp01(threshold);
-            particleUpdate.SetInt(kThresholdKey, Mathf.FloorToInt(threshold * data.Height));
 
             particleUpdate.SetFloat(kDelaySpeedKey, delaySpeed);
             particleUpdate.SetFloat(kTransformSpeedKey, transformSpeed);

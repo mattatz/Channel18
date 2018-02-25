@@ -935,14 +935,20 @@ MonoBehaviour:
     enabled: 0
     min: {fileID: 875914627}
     max: {fileID: 426212373}
+    tmin: 0
+    tmax: 1
   y:
     enabled: 0
     min: {fileID: 1992209506}
     max: {fileID: 711159279}
+    tmin: 0
+    tmax: 1
   z:
     enabled: 0
     min: {fileID: 1246479305}
     max: {fileID: 634477494}
+    tmin: 0
+    tmax: 1
 --- !u!1 &875914624
 GameObject:
   m_ObjectHideFlags: 0
@@ -1054,7 +1060,7 @@ MonoBehaviour:
   skin: {fileID: 222416520}
   resolution: 82
   level: 0
-  count: 262144
+  count: 420000
   voxelizer: {fileID: 7200000, guid: 5fdfd9c0be0cd42fca24f981cc152dd4, type: 3}
   voxelControl: {fileID: 7200000, guid: 1a72af1e17cd6c746ad09aa5137ba00b, type: 3}
   particleUpdate: {fileID: 7200000, guid: dc110c7af97e68747b98a25256389d0a, type: 3}
@@ -1062,25 +1068,24 @@ MonoBehaviour:
   voxelMode: 0
   speedScaleMin: 2
   speedScaleMax: 5
-  speedLimit: 150
-  drag: 0.1
-  gravity: {x: 0, y: -8.1, z: 0}
-  speedToSpin: 60
-  maxSpin: 20
-  noiseAmplitude: 100
-  noiseFrequency: 0.001
-  noiseMotion: 1
-  threshold: 0
+  speedLimit: 1
+  drag: 0.05
+  gravity: {x: 0, y: 0.00081, z: 0}
+  speedToSpin: 560000
+  maxSpin: 300
+  noiseAmplitude: 0.0065
+  noiseFrequency: 10
+  noiseMotion: 0.25
   frame: 1
   delaySpeed: 1.5
   transformSpeed: 1.5
-  clipSpeed: 1.5
+  clipSpeed: 10.5
   baseClipBounds:
     m_Center: {x: 0, y: 0.1, z: 0}
-    m_Extent: {x: 0.05, y: 0.1, z: 0.05}
+    m_Extent: {x: 0.1, y: 0.1, z: 0.075}
   clipBounds:
     m_Center: {x: 0, y: 0.1, z: 0}
-    m_Extent: {x: 0.05, y: 0.1, z: 0.05}
+    m_Extent: {x: 0.1, y: 0.1, z: 0.05}
   throttle: 0.1
 --- !u!33 &1001449984
 MeshFilter:

@@ -3,6 +3,7 @@
 #pragma kernel Delay
 #pragma kernel Transform
 #pragma kernel Clip
+#pragma kernel Flow
 
 #define THREAD [numthreads(8, 1, 1)]
 #define DISCARD_OVERFLOW if (id.x >= _ParticleCount) return;
@@ -222,7 +223,6 @@ void Clip (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
-
     Voxel v = GetVoxel(id.x);
     VParticle particle = _ParticleBuffer[id.x];
     
@@ -236,6 +236,22 @@ void Clip (uint3 id : SV_DispatchThreadID)
     particle.velocity = float3(0, 0, 0);
     particle.scale = lerp(particle.scale, float3(_UnitLength, _UnitLength, _UnitLength) * flag, dt);
     particle.rotation = QUATERNION_IDENTITY;
+    _ParticleBuffer[id.x] = particle;
+}
+
+THREAD
+void Flow (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD_OVERFLOW
+
+    // Voxel v = GetVoxel(id.x);
+    VParticle particle = _ParticleBuffer[id.x];
+    
+    // float dt = saturate(_DT.x * particle.speed);
+    particle = UpdatePosition(particle, id.xy);
+    particle = UpdateVelocity(particle, id.xy);
+    particle = UpdateRotation(particle, id.xy);
+    // particle.scale = float3(_UnitLength, _UnitLength, _UnitLength);
     _ParticleBuffer[id.x] = particle;
 }
 

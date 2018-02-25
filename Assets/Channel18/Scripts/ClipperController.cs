@@ -10,6 +10,7 @@ namespace VJ.Channel18
     {
         [SerializeField] protected bool enabled;
         [SerializeField] protected Clipper min, max;
+        [SerializeField, Range(0f, 1f)] protected float tmin = 0f, tmax = 1f;
 
         public void Update ()
         {
@@ -20,8 +21,10 @@ namespace VJ.Channel18
 
         public void Constrain()
         {
-            min.t = Mathf.Min(min.t, max.t);
-            max.t = Mathf.Max(min.t, max.t);
+            tmin = Mathf.Min(tmin, tmax);
+            tmax = Mathf.Max(tmin, tmax);
+            min.t = tmin;
+            max.t = tmax;
         }
     };
 
