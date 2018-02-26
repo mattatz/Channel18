@@ -5,6 +5,7 @@
 		_MainTex ("Texture", 2D) = "white" {}
         _Scale ("Scale", Range(0, 1)) = 0.25
         _Speed ("Speed", Range(0, 1)) = 0.25
+        _Border ("Border", Range(0, 1.0)) = 0.05
         _T ("T", Range(0, 1)) = 1.0
 	}
 	SubShader
@@ -42,12 +43,16 @@
 			
 			sampler2D _MainTex;
             fixed _Scale, _Speed, _T;
+            fixed _Border;
 
 			fixed4 frag (v2f i) : SV_Target
 			{
-                float2 uv = i.uv;
                 float r = _ScreenParams.x / _ScreenParams.y;
-                uv.xy += snoise(float3(float2(uv.x * r, uv.y)  * _Scale, _Time.y * _Speed)).xy * _T;
+                float2 uv = i.uv;
+                float x = uv.x * r, y = uv.y;
+                float2 displacement = snoise(float3(float2(x, y) * _Scale, _Time.y * _Speed)).xy;
+                float s = smoothstep(0, _Border * r, uv.x) * smoothstep(1.0, 1.0 - _Border * r, uv.x) * smoothstep(0, _Border, uv.y) * smoothstep(1.0, 1.0 - _Border, uv.y);
+                uv.xy += displacement * s * _T;
                 fixed4 col = tex2D(_MainTex, frac(uv));
                 return col;
             }

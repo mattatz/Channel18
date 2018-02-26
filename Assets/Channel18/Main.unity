@@ -231,80 +231,28 @@ Light:
   m_UseColorTemperature: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
---- !u!1001 &78899600
-Prefab:
+--- !u!1 &95086879 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 100000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
+  m_PrefabInternal: {fileID: 1416540528}
+--- !u!95 &95086880 stripped
+Animator:
+  m_PrefabParentObject: {fileID: 9500000, guid: f90dfd365c4bd2841b395946b8d6e218,
+    type: 3}
+  m_PrefabInternal: {fileID: 1416540528}
+--- !u!114 &95086882
+MonoBehaviour:
   m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_RootOrder
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: e9bd542b73b632448af537d610231c21, type: 2}
-    - target: {fileID: 100000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_Name
-      value: Figure
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_CullingMode
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-  m_IsPrefabParent: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 95086879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbc49bd3d1efdf94ea4770e35ed3bcd3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 95086880}
+  motion: 0
 --- !u!1 &100928077
 GameObject:
   m_ObjectHideFlags: 0
@@ -1060,7 +1008,7 @@ MonoBehaviour:
   skin: {fileID: 222416520}
   resolution: 82
   level: 0
-  count: 420000
+  count: 400000
   voxelizer: {fileID: 7200000, guid: 5fdfd9c0be0cd42fca24f981cc152dd4, type: 3}
   voxelControl: {fileID: 7200000, guid: 1a72af1e17cd6c746ad09aa5137ba00b, type: 3}
   particleUpdate: {fileID: 7200000, guid: dc110c7af97e68747b98a25256389d0a, type: 3}
@@ -1080,6 +1028,7 @@ MonoBehaviour:
   delaySpeed: 1.5
   transformSpeed: 1.5
   clipSpeed: 10.5
+  flowSpeed: 0.1
   baseClipBounds:
     m_Center: {x: 0, y: 0.1, z: 0}
     m_Extent: {x: 0.1, y: 0.1, z: 0.075}
@@ -1272,6 +1221,14 @@ Prefab:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: e9bd542b73b632448af537d610231c21, type: 2}
+    - target: {fileID: 100000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
+      propertyPath: m_Name
+      value: Figure1.5k
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
   m_IsPrefabParent: 0

@@ -7,6 +7,7 @@ struct VParticle {
     float3 scale;
     float3 velocity;
     float speed;
+    float lifetime;
 };
 
 #endif

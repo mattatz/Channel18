@@ -11,6 +11,7 @@ namespace VJ.Channel18
         public Vector3 scale;
         public Vector3 velocity;
         public float speed;
+        public float lifetime;
     }
 
 }

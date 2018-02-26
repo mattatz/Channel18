@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -15,13 +16,13 @@ namespace VJ.Channel18
             base.OnInspectorGUI();
 
             var system = target as VoxelParticleSystem;
-            if(GUILayout.Button("Randomize"))
+            var names = Enum.GetNames(typeof(ParticleMode));
+            var selected = GUILayout.SelectionGrid((int)system.PMode, names, 2);
+            if(selected != (int)system.PMode)
             {
-                system.Randomize();
-            } else if(GUILayout.Button("Glitch"))
-            {
-                system.Glitch();
+                system.PMode = (ParticleMode)selected;
             }
+
         }
 
     }

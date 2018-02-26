@@ -36,10 +36,8 @@ float3 _NoiseOffset;
 
 uint _Threshold;
 
-// Deterministic random rotation axis.
 float3 RotationAxis(float2 uv)
 {
-    // Uniformaly distributed points
     // http://mathworld.wolfram.com/SpherePointPicking.html
     float u = nrand(uv, 10) * 2 - 1;
     float u2 = sqrt(1 - u * u);
@@ -48,7 +46,7 @@ float3 RotationAxis(float2 uv)
     return float3(u2 * cs, u2 * sn, u);
 }
 
-VParticle UpdatePosition(VParticle particle, uint2 id) 
+float3 UpdatePosition(VParticle particle, uint2 id) 
 {
     float3 p = particle.position;
     float3 v = particle.velocity;
@@ -59,12 +57,10 @@ VParticle UpdatePosition(VParticle particle, uint2 id)
 
     // Update the position with the velocity.
     p.xyz += v.xyz * _DT.x;
-    particle.position = p;
-
-    return particle;
+    return p;
 }
 
-VParticle UpdateVelocity(VParticle particle, uint2 id)
+float3 UpdateVelocity(VParticle particle, uint2 id)
 {
     float3 p = particle.position;
     float3 v = particle.velocity;
@@ -78,12 +74,10 @@ VParticle UpdateVelocity(VParticle particle, uint2 id)
     float3 n1 = snoise_grad(np);
     float3 n2 = snoise_grad(np + float3(21.83, 13.28, 7.32));
     v.xyz += cross(n1, n2) * _NoiseParams.y * particle.speed;
-    particle.velocity = v;
-
-    return particle;
+    return v;
 }
 
-VParticle UpdateRotation(VParticle particle, uint2 id)
+float4 UpdateRotation(VParticle particle, uint2 id)
 {
     float4 r = particle.rotation;
     float3 v = particle.velocity;
@@ -98,9 +92,7 @@ VParticle UpdateRotation(VParticle particle, uint2 id)
     float4 dq = float4(RotationAxis(id) * sn, cs);
 
     // Apply the quaternion and normalize it.
-    particle.rotation = normalize(qmul(dq, r));
-
-    return particle;
+    return normalize(qmul(dq, r));
 }
 
 uint3 GetPosition(uint index) {
@@ -164,6 +156,7 @@ void Setup (uint3 id : SV_DispatchThreadID)
     particle.scale = float3(_UnitLength, _UnitLength, _UnitLength);
     particle.velocity = float3(0, 0, 0);
     particle.speed = lerp(_Speed.x, _Speed.y, nrand(id.xy));
+    particle.lifetime = 1.0;
     _ParticleBuffer[id.x] = particle;
 }
 
@@ -182,7 +175,7 @@ void Immediate (uint3 id : SV_DispatchThreadID)
     _ParticleBuffer[id.x] = particle;
 }
 
-half _DelaySpeed, _TransformSpeed, _ClipSpeed;
+half _DelaySpeed, _TransformSpeed, _ClipSpeed, _FlowSpeed;
 
 THREAD
 void Delay (uint3 id : SV_DispatchThreadID)
@@ -244,14 +237,28 @@ void Flow (uint3 id : SV_DispatchThreadID)
 {
     DISCARD_OVERFLOW
 
-    // Voxel v = GetVoxel(id.x);
     VParticle particle = _ParticleBuffer[id.x];
-    
-    // float dt = saturate(_DT.x * particle.speed);
-    particle = UpdatePosition(particle, id.xy);
-    particle = UpdateVelocity(particle, id.xy);
-    particle = UpdateRotation(particle, id.xy);
-    // particle.scale = float3(_UnitLength, _UnitLength, _UnitLength);
+
+    float dt = saturate(_DT.x * particle.speed * _FlowSpeed);
+    particle.lifetime -= dt;
+
+    Voxel v = GetVoxel(id.x);
+    if (particle.lifetime < 0.0)
+    {
+        particle.position = v.position;
+        particle.velocity = float3(0, 0, 0);
+        particle.rotation = QUATERNION_IDENTITY;
+        particle.scale = float3(0, 0, 0);
+        particle.lifetime = 1.0;
+    } else {
+        particle.position = UpdatePosition(particle, id.xy);
+        particle.velocity = UpdateVelocity(particle, id.xy);
+        particle.rotation = UpdateRotation(particle, id.xy);
+    }
+
+    float3 scale = (float)v.flag * float3(_UnitLength, _UnitLength, _UnitLength) * smoothstep(0, 0.25, particle.lifetime) * smoothstep(1.0, 0.75, particle.lifetime);
+    particle.scale = lerp(particle.scale, scale, saturate(dt * 10.0));
+
     _ParticleBuffer[id.x] = particle;
 }
 
