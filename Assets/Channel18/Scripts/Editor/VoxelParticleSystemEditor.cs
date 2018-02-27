@@ -16,11 +16,18 @@ namespace VJ.Channel18
             base.OnInspectorGUI();
 
             var system = target as VoxelParticleSystem;
-            var names = Enum.GetNames(typeof(ParticleMode));
-            var selected = GUILayout.SelectionGrid((int)system.PMode, names, 2);
-            if(selected != (int)system.PMode)
+            var pNames = Enum.GetNames(typeof(ParticleMode));
+            var pSelected = GUILayout.SelectionGrid((int)system.PMode, pNames, 2);
+            if(pSelected != (int)system.PMode)
             {
-                system.PMode = (ParticleMode)selected;
+                system.PMode = (ParticleMode)pSelected;
+            }
+
+            var vNames = Enum.GetNames(typeof(VoxelMode));
+            var vSelected = GUILayout.SelectionGrid((int)system.VMode, vNames, 2);
+            if(vSelected != (int)system.VMode)
+            {
+                system.VMode = (VoxelMode)vSelected;
             }
 
         }

@@ -28,7 +28,8 @@ namespace VJ.Channel18
     {
         Default,
         Randomize,
-        Glitch
+        Glitch,
+        Wall
     };
 
     #endregion
@@ -87,6 +88,7 @@ namespace VJ.Channel18
         [SerializeField, Range(1, 10)] protected int frame = 1;
         [SerializeField, Range(0, 50f)] protected float delaySpeed = 1.5f, transformSpeed = 1.5f, clipSpeed = 1.5f;
         [SerializeField, Range(0, 1f)] protected float flowSpeed = 0.1f;
+        [SerializeField, Range(0f, 1f)] protected float flowRandomThrottle = 0.1f;
         [SerializeField] protected Bounds baseClipBounds, clipBounds;
 
         #region Voxel control properties
@@ -99,7 +101,7 @@ namespace VJ.Channel18
         protected GPUVoxelData data;
         protected Bounds bounds;
 
-        protected Kernel setupKer, immediateKer, delayKer;
+        protected Kernel setupKer, flowRandomKer;
         protected Kernel randomizeKer, glitchKer;
 
         protected ComputeBuffer particleBuffer;
@@ -148,10 +150,9 @@ namespace VJ.Channel18
             renderer.GetPropertyBlock(block);
 
             setupKer = new Kernel(particleUpdate, "Setup");
+            flowRandomKer = new Kernel(particleUpdate, "FlowRandom");
             SetupParticleKernels();
-            voxelKernels = new Dictionary<VoxelMode, Kernel>();
-            voxelKernels.Add(VoxelMode.Randomize, new Kernel(voxelControl, "Randomize"));
-            voxelKernels.Add(VoxelMode.Glitch, new Kernel(voxelControl, "Glitch"));
+            SetupVoxelKernels();
 
             Setup();
         }
@@ -164,6 +165,15 @@ namespace VJ.Channel18
                 particleKernels.Add(mode, new Kernel(particleUpdate, Enum.GetName(typeof(ParticleMode), mode)));
             }
         }
+
+        void SetupVoxelKernels()
+        {
+            voxelKernels = new Dictionary<VoxelMode, Kernel>();
+            foreach(VoxelMode mode in Enum.GetValues(typeof(VoxelMode)))
+            {
+                voxelKernels.Add(mode, new Kernel(voxelControl, Enum.GetName(typeof(VoxelMode), mode)));
+            }
+        }
       
         void Update () {
             if(Time.frameCount % frame == 0)
@@ -173,6 +183,11 @@ namespace VJ.Channel18
                 bounds.Encapsulate(cached.bounds.min);
                 bounds.Encapsulate(cached.bounds.max);
                 Voxelize(cached, bounds);
+            }
+
+            if(Time.frameCount % 120 == 0)
+            {
+                FlowRandom();
             }
 
             if(voxelMode != VoxelMode.Default) {
@@ -266,7 +281,7 @@ namespace VJ.Channel18
 			voxelControl.Dispatch(kernel.Index, data.Width / (int)kernel.ThreadX + 1, data.Height / (int)kernel.ThreadY + 1, (int)kernel.ThreadZ);
         }
 
-        void ComputeParticle (Kernel kernel, float dt)
+        void ComputeParticle (Kernel kernel, float dt = 0f)
         {
             particleUpdate.SetBuffer(kernel.Index, kVoxelBufferKey, data.Buffer);
             particleUpdate.SetInt(kVoxelCountKey, data.Width * data.Height * data.Depth);
@@ -279,6 +294,7 @@ namespace VJ.Channel18
             particleUpdate.SetBuffer(kernel.Index, kParticleBufferKey, particleBuffer);
             particleUpdate.SetInt(kParticleCountKey, particleBuffer.count);
 
+            particleUpdate.SetVector(kTimeKey, GetTime(Time.timeSinceLevelLoad));
             particleUpdate.SetVector(kDTKey, new Vector2(dt, 1f / dt));
             particleUpdate.SetVector(kDamperKey, new Vector2(Mathf.Exp(-drag * dt), speedLimit));
             particleUpdate.SetVector(kGravityKey, gravity * dt);
@@ -313,6 +329,12 @@ namespace VJ.Channel18
         {
             Voxelize(cached, bounds);
             ComputeVoxel(voxelKernels[VoxelMode.Glitch], 0f);
+        }
+
+        public void FlowRandom()
+        {
+            particleUpdate.SetFloat("_FlowRandomThrottle", flowRandomThrottle);
+            ComputeParticle(flowRandomKer);
         }
 
         Mesh BuildPoints(int count)

@@ -1,5 +1,7 @@
-﻿#pragma kernel Randomize
+﻿#pragma kernel Default
+#pragma kernel Randomize
 #pragma kernel Glitch
+#pragma kernel Wall
 
 #define THREAD [numthreads(8, 8, 1)]
 
@@ -17,6 +19,8 @@ int _Width, _Height, _Depth;
 float _DT;
 float _Throttle;
 
+int _WallStart, _WallEnd;
+
 CBUFFER_END
 
 RWStructuredBuffer<Voxel> _VoxelBuffer;
@@ -31,6 +35,11 @@ float3 get_voxel_position(int x, int y, int z) {
         _Start.y + _Unit * y + _HalfUnit,
         _Start.z + _Unit * z + _HalfUnit
     );
+}
+
+THREAD
+void Default (uint3 id : SV_DispatchThreadID)
+{
 }
 
 THREAD
@@ -85,3 +94,22 @@ void Glitch (uint3 id : SV_DispatchThreadID)
     }
 }
 
+THREAD
+void Wall (uint3 id : SV_DispatchThreadID)
+{
+    int x = (int)id.x;
+    int y = (int)id.y;
+
+    if (x >= _Width) return;
+    if (y >= _Height) return;
+
+    int start = max(0, _WallStart);
+    int end = min(_WallEnd, _Depth);
+    for (int z = start; z < end; z++)
+    {
+        uint vid = get_voxel_index(x, y, z);
+        Voxel v = _VoxelBuffer[vid];
+        v.flag = true;
+        _VoxelBuffer[vid] = v;
+    }
+}

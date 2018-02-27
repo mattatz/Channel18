@@ -8,6 +8,7 @@ struct VParticle {
     float3 velocity;
     float speed;
     float lifetime;
+    bool flow;
 };
 
 #endif
