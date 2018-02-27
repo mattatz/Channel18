@@ -28,17 +28,17 @@ namespace VJ.Channel18
             {
                 case ClipAxis.X:
                     transform.localRotation = Quaternion.AngleAxis(90f, Vector3.forward);
-                    frame.width = bb.size.y;
-                    frame.height = bb.size.z;
+                    frame.Width = bb.size.y;
+                    frame.Height = bb.size.z;
                     break;
                 case ClipAxis.Y:
-                    frame.width = bb.size.x;
-                    frame.height = bb.size.z;
+                    frame.Width = bb.size.x;
+                    frame.Height = bb.size.z;
                     break;
                 case ClipAxis.Z:
                     transform.localRotation = Quaternion.AngleAxis(90f, Vector3.right);
-                    frame.width = bb.size.x;
-                    frame.height = bb.size.y;
+                    frame.Width = bb.size.x;
+                    frame.Height = bb.size.y;
                     break;
             }
         }
