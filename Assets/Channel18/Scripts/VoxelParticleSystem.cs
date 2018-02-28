@@ -29,7 +29,7 @@ namespace VJ.Channel18
         Default,
         Randomize,
         Glitch,
-        Wall
+        Clip
     };
 
     #endregion
@@ -94,6 +94,7 @@ namespace VJ.Channel18
         #region Voxel control properties
 
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.1f;
+        [SerializeField, Range(0f, 1f)] protected float wallStart = 0f, wallEnd = 1f;
 
         #endregion
 
@@ -185,10 +186,12 @@ namespace VJ.Channel18
                 Voxelize(cached, bounds);
             }
 
+            /*
             if(Time.frameCount % 120 == 0)
             {
                 FlowRandom();
             }
+            */
 
             if(voxelMode != VoxelMode.Default) {
                 ComputeVoxel(voxelKernels[voxelMode], 0f);
@@ -329,6 +332,14 @@ namespace VJ.Channel18
         {
             Voxelize(cached, bounds);
             ComputeVoxel(voxelKernels[VoxelMode.Glitch], 0f);
+        }
+
+        public void Clip(Vector3 min, Vector3 max)
+        {
+            voxelControl.SetVector(kClipMinKey, new Vector3(min.x * data.Width, min.y * data.Height, min.z * data.Depth));
+            voxelControl.SetVector(kClipMaxKey, new Vector3(max.x * data.Width, max.y * data.Height, max.z * data.Depth));
+            // ComputeVoxel(voxelKernels[VoxelMode.Clip], 0f);
+            VMode = VoxelMode.Clip;
         }
 
         public void FlowRandom()

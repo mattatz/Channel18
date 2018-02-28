@@ -1,7 +1,7 @@
 ﻿#pragma kernel Default
 #pragma kernel Randomize
 #pragma kernel Glitch
-#pragma kernel Wall
+#pragma kernel Clip
 
 #define THREAD [numthreads(8, 8, 1)]
 
@@ -19,7 +19,7 @@ int _Width, _Height, _Depth;
 float _DT;
 float _Throttle;
 
-int _WallStart, _WallEnd;
+float3 _ClipMin, _ClipMax;
 
 CBUFFER_END
 
@@ -95,16 +95,16 @@ void Glitch (uint3 id : SV_DispatchThreadID)
 }
 
 THREAD
-void Wall (uint3 id : SV_DispatchThreadID)
+void Clip (uint3 id : SV_DispatchThreadID)
 {
     int x = (int)id.x;
     int y = (int)id.y;
 
-    if (x >= _Width) return;
-    if (y >= _Height) return;
+    if (x >= _Width || x < _ClipMin.x || x > _ClipMax.x) return;
+    if (y >= _Height || y < _ClipMin.y || y > _ClipMax.y) return;
 
-    int start = max(0, _WallStart);
-    int end = min(_WallEnd, _Depth);
+    int start = max(0, _ClipMin.z);
+    int end = min(_ClipMax.z, _Depth);
     for (int z = start; z < end; z++)
     {
         uint vid = get_voxel_index(x, y, z);

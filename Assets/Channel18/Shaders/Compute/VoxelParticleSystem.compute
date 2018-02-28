@@ -298,7 +298,7 @@ void FlowRandom (uint3 id : SV_DispatchThreadID)
     DISCARD_OVERFLOW
 
     VParticle particle = _ParticleBuffer[id.x];
-    particle.flow = (nrand(id.xy, _Time.x) < _FlowRandomThrottle);
+    particle.flow = particle.flow || (nrand(id.xy, _Time.x) < _FlowRandomThrottle);
     _ParticleBuffer[id.x] = particle;
 }
 
