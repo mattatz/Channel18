@@ -186,12 +186,7 @@ namespace VJ.Channel18
                 Voxelize(cached, bounds);
             }
 
-            /*
-            if(Time.frameCount % 120 == 0)
-            {
-                FlowRandom();
-            }
-            */
+            if(Time.frameCount % 120 == 0) FlowRandom();
 
             if(voxelMode != VoxelMode.Default) {
                 ComputeVoxel(voxelKernels[voxelMode], 0f);

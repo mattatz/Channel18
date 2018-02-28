@@ -184,12 +184,18 @@ void Immediate (uint3 id : SV_DispatchThreadID)
     Voxel v = GetVoxel(id.x);
     VParticle particle = _ParticleBuffer[id.x];
 
-    particle.position = v.position;
-    particle.velocity = float3(0, 0, 0);
-    particle.scale = float3(1, 1, 1) * lerp(0, _UnitLength, (float)v.flag);
-    particle.rotation = QUATERNION_IDENTITY;
-    particle.lifetime = 1.0;
-    particle.flow = false;
+    if (particle.flow)
+    {
+        UpdateFlow(particle, v, id);
+        particle.flow = (particle.lifetime >= 0.0);
+    } else {
+        particle.position = v.position;
+        particle.velocity = float3(0, 0, 0);
+        particle.scale = float3(1, 1, 1) * lerp(0, _UnitLength, (float)v.flag);
+        particle.rotation = QUATERNION_IDENTITY;
+        particle.lifetime = 1.0;
+        particle.flow = false;
+    }
     _ParticleBuffer[id.x] = particle;
 }
 
