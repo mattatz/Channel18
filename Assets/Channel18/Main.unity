@@ -524,6 +524,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 459535486}
+  - component: {fileID: 459535487}
   m_Layer: 0
   m_Name: Monolith
   m_TagString: Untagged
@@ -544,6 +545,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &459535487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 459535485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9212a87b1fb0646449404f0792ee4b23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  system: {fileID: 1001449983}
+  minX: 0
+  minY: 0
+  minZ: 0
+  maxX: 1
+  maxY: 1
+  maxZ: 1
 --- !u!1 &477958108
 GameObject:
   m_ObjectHideFlags: 0
@@ -1212,7 +1231,7 @@ MonoBehaviour:
   voxelizer: {fileID: 7200000, guid: 5fdfd9c0be0cd42fca24f981cc152dd4, type: 3}
   voxelControl: {fileID: 7200000, guid: 1a72af1e17cd6c746ad09aa5137ba00b, type: 3}
   particleUpdate: {fileID: 7200000, guid: dc110c7af97e68747b98a25256389d0a, type: 3}
-  particleMode: 3
+  particleMode: 1
   voxelMode: 0
   speedScaleMin: 2
   speedScaleMax: 5

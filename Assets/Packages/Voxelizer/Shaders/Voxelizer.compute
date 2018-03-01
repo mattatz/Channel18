@@ -13,6 +13,7 @@ float3 _Start, _End, _Size;
 float _Unit, _InvUnit, _HalfUnit;
 
 int _Width, _Height, _Depth;
+int _Visible;
 
 CBUFFER_END
 
@@ -75,6 +76,8 @@ void voxelize_surface(int x, int y)
     );
     float3 dir = float3(0, 0, 1);
 
+    bool visible = (_Visible == 1);
+
     // check intersections
     for(int i = 0; i < _TrianglesCount; i += 3) {
         int a = _TriBuffer[i];
@@ -98,7 +101,7 @@ void voxelize_surface(int x, int y)
 
             voxel.position = get_voxel_position(x, y, z);
             voxel.uv = u * uv1 + v * uv2 + (1.0 - u - v) * uv0;
-            voxel.flag = true;
+            voxel.flag = visible;
             _VoxelBuffer[vid] = voxel;
         }
     }
@@ -115,6 +118,8 @@ void Volume (uint3 id : SV_DispatchThreadID)
 
     voxelize_surface(x, y);
 
+    bool visible = (_Visible == 1);
+
     // fill in
     for(int z = 0; z < _Depth; z++) {
         uint vid = get_voxel_index(x, y, z);
@@ -129,7 +134,7 @@ void Volume (uint3 id : SV_DispatchThreadID)
                         Voxel nv;
                         nv.position = get_voxel_position(x, y, z2);
                         nv.uv = v.uv;
-                        nv.flag = true;
+                        nv.flag = visible;
                         _VoxelBuffer[get_voxel_index(x, y, z2)] = nv;
                     }
                     z = end + 1;

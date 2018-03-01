@@ -66,6 +66,7 @@ namespace VJ.Channel18
         [SerializeField] protected ComputeShader voxelizer, voxelControl, particleUpdate;
         [SerializeField] protected ParticleMode particleMode = ParticleMode.Immediate;
         [SerializeField] protected VoxelMode voxelMode = VoxelMode.Default;
+        [SerializeField] protected bool voxelVisible = true;
 
         protected Dictionary<ParticleMode, Kernel> particleKernels;
         protected Dictionary<VoxelMode, Kernel> voxelKernels;
@@ -88,13 +89,19 @@ namespace VJ.Channel18
         [SerializeField, Range(1, 10)] protected int frame = 1;
         [SerializeField, Range(0, 50f)] protected float delaySpeed = 1.5f, transformSpeed = 1.5f, clipSpeed = 1.5f;
         [SerializeField, Range(0, 1f)] protected float flowSpeed = 0.1f;
-        [SerializeField, Range(0f, 1f)] protected float flowRandomThrottle = 0.1f;
         [SerializeField] protected Bounds baseClipBounds, clipBounds;
+
+        #region Flow Random properties
+
+        [SerializeField] protected bool flowRandom = false;
+        [SerializeField] protected int flowRandomFreq = 100;
+        [SerializeField, Range(0f, 1f)] protected float flowRandomThrottle = 0.1f;
+
+        #endregion
 
         #region Voxel control properties
 
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.1f;
-        [SerializeField, Range(0f, 1f)] protected float wallStart = 0f, wallEnd = 1f;
 
         #endregion
 
@@ -176,7 +183,7 @@ namespace VJ.Channel18
             }
         }
       
-        void Update () {
+        protected void Update () {
             if(Time.frameCount % frame == 0)
             {
                 cached = Sample();
@@ -186,7 +193,7 @@ namespace VJ.Channel18
                 Voxelize(cached, bounds);
             }
 
-            if(Time.frameCount % 120 == 0) FlowRandom();
+            if(flowRandom && Time.frameCount % flowRandomFreq == 0) FlowRandom();
 
             if(voxelMode != VoxelMode.Default) {
                 ComputeVoxel(voxelKernels[voxelMode], 0f);
@@ -245,7 +252,7 @@ namespace VJ.Channel18
                 data = null;
             }
 			// data = GPUVoxelizer.Voxelize(voxelizer, mesh, mesh.bounds, resolution, true, false);
-			data = GPUVoxelizer.Voxelize(voxelizer, mesh, bounds, resolution >> level, true, false);
+			data = GPUVoxelizer.Voxelize(voxelizer, mesh, bounds, resolution >> level, true, false, voxelVisible);
         }
 
         Mesh Sample()

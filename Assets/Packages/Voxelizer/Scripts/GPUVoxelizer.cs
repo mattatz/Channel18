@@ -15,6 +15,7 @@ namespace VoxelSystem {
 		protected const string kStartKey = "_Start", kEndKey = "_End", kSizeKey = "_Size";
 		protected const string kUnitKey = "_Unit", kInvUnitKey = "_InvUnit", kHalfUnitKey = "_HalfUnit";
 		protected const string kWidthKey = "_Width", kHeightKey = "_Height", kDepthKey = "_Depth";
+        protected const string kVisibleKey = "_Visible";
 		protected const string kTriCountKey = "_TrianglesCount";
 		protected const string kVertBufferKey = "_VertBuffer", kUVBufferKey = "_UVBuffer", kTriBufferKey = "_TriBuffer";
 		protected const string kVoxelBufferKey = "_VoxelBuffer", kVoxelTextureKey = "_VoxelTexture";
@@ -29,12 +30,12 @@ namespace VoxelSystem {
             return (int)Mathf.Pow(2, k);
         }
 
-		public static GPUVoxelData Voxelize(ComputeShader voxelizer, Mesh mesh, int count = 32, bool volume = true, bool pow2 = false) {
+		public static GPUVoxelData Voxelize(ComputeShader voxelizer, Mesh mesh, int count = 32, bool volume = true, bool pow2 = false, bool visible = true) {
 			mesh.RecalculateBounds();
-            return Voxelize(voxelizer, mesh, mesh.bounds, count, volume, pow2);
+            return Voxelize(voxelizer, mesh, mesh.bounds, count, volume, pow2, visible);
 		}
 
-        public static GPUVoxelData Voxelize(ComputeShader voxelizer, Mesh mesh, Bounds bounds, int count = 32, bool volume = true, bool pow2 = false)
+        public static GPUVoxelData Voxelize(ComputeShader voxelizer, Mesh mesh, Bounds bounds, int count = 32, bool volume = true, bool pow2 = false, bool visible = true)
         {
 			var vertices = mesh.vertices;
 			var vertBuffer = new ComputeBuffer(vertices.Length, Marshal.SizeOf(typeof(Vector3)));
@@ -83,6 +84,7 @@ namespace VoxelSystem {
 			voxelizer.SetInt(kWidthKey, w);
 			voxelizer.SetInt(kHeightKey, h);
 			voxelizer.SetInt(kDepthKey, d);
+			voxelizer.SetInt(kVisibleKey, visible ? 1 : 0);
 
 			// send mesh data
 			voxelizer.SetBuffer(kernel.Index, kVertBufferKey, vertBuffer);
