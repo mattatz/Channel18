@@ -551,7 +551,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 459535485}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9212a87b1fb0646449404f0792ee4b23, type: 3}
   m_Name: 
@@ -563,6 +563,8 @@ MonoBehaviour:
   maxX: 1
   maxY: 1
   maxZ: 1
+  useRandom: 0
+  randomFreq: 10
 --- !u!1 &477958108
 GameObject:
   m_ObjectHideFlags: 0
@@ -1233,6 +1235,7 @@ MonoBehaviour:
   particleUpdate: {fileID: 7200000, guid: dc110c7af97e68747b98a25256389d0a, type: 3}
   particleMode: 1
   voxelMode: 0
+  voxelVisible: 1
   speedScaleMin: 2
   speedScaleMax: 5
   speedLimit: 1
@@ -1248,16 +1251,16 @@ MonoBehaviour:
   transformSpeed: 1.5
   clipSpeed: 10.5
   flowSpeed: 0.1
-  flowRandomThrottle: 0.1
   baseClipBounds:
     m_Center: {x: 0, y: 0.1, z: 0}
     m_Extent: {x: 0.1, y: 0.1, z: 0.075}
   clipBounds:
     m_Center: {x: 0, y: 0.1, z: 0}
     m_Extent: {x: 0.1, y: 0.1, z: 0.05}
+  flowRandom: 0
+  flowRandomFreq: 100
+  flowRandomThrottle: 0.1
   throttle: 0.1
-  wallStart: 0
-  wallEnd: 1
 --- !u!33 &1001449984
 MeshFilter:
   m_ObjectHideFlags: 0

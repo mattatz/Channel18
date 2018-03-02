@@ -12,13 +12,19 @@ namespace VJ.Channel18
         [SerializeField] protected VoxelParticleSystem system;
         [SerializeField, Range(0f, 1f)] protected float minX = 0f, minY = 0f, minZ = 0f;
         [SerializeField, Range(0f, 1f)] protected float maxX = 1f, maxY = 1f, maxZ = 1f;
+        [SerializeField] protected bool useRandom = false;
+        [SerializeField] protected int randomFreq = 10;
 
         void Start () {
         }
         
         void Update () {
             Constrain();
-            Randomize();
+
+            if(useRandom && Time.frameCount % Mathf.Max(1, randomFreq) == 0)
+            {
+                Randomize();
+            }
         }
 
         public void Clip()

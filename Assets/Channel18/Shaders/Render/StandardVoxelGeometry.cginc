@@ -12,7 +12,6 @@
 #define PASS_CUBE_SHADOWCASTER
 #endif
 
-// Shader uniforms
 half4 _Color;
 sampler2D _MainTex;
 float4 _MainTex_ST;
