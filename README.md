@@ -7,3 +7,4 @@ VJ Set for channel #18
 - Rigging and animations - https://www.mixamo.com/#/
 - hiroakioishi/UnityImageEffects - https://github.com/hiroakioishi/UnityImageEffects
 - keijoro/MidiJack - https://github.com/keijiro/MidiJack
+- jorgegarcia/UnityOSC - https://github.com/jorgegarcia/UnityOSC
