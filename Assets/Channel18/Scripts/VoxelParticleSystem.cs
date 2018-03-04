@@ -34,7 +34,7 @@ namespace VJ.Channel18
 
     #endregion
 
-    public class VoxelParticleSystem : MonoBehaviour {
+    public class VoxelParticleSystem : MonoBehaviour, IOSCReactable {
 
         #region Accessors
 
@@ -348,6 +348,10 @@ namespace VJ.Channel18
         {
             particleUpdate.SetFloat("_FlowRandomThrottle", flowRandomThrottle);
             ComputeParticle(flowRandomKer);
+        }
+
+        public void OnOSC(string address, List<object> data)
+        {
         }
 
         Mesh BuildPoints(int count)

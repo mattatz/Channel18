@@ -5,7 +5,7 @@ using UnityEngine;
 namespace VJ.Channel18
 {
 
-    public class ProceduralFloorGrid : ProceduralGrid {
+    public class ProceduralFloorGrid : ProceduralGrid, IOSCReactable {
 
         [SerializeField, Range(0f, 100f)] protected float plasticity = 10f;
         [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f, noiseIntensity = 3f;
@@ -200,6 +200,10 @@ namespace VJ.Channel18
                     }
                 }
             }
+        }
+
+        public void OnOSC(string address, List<object> data)
+        {
         }
 
     }

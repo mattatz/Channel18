@@ -57,7 +57,7 @@ void Update (uint3 id : SV_DispatchThreadID)
 
     Bubble bub = _Bubbles[id.x];
     bub.lifetime -= _DT * bub.mass * _Decay;
-    if (bub.lifetime < 0.0 && nrand(id.xy) < _Throttle) {
+    if (bub.lifetime < 0.0 && abs(nrand(id.xy)) < _Throttle) {
         Initialize(bub, id);
     }
 

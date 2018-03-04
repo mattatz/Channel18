@@ -10,7 +10,7 @@ using Random = UnityEngine.Random;
 namespace VJ.Channel18
 {
 
-    public class BubbleParticleSystem : MonoBehaviour {
+    public class BubbleParticleSystem : MonoBehaviour, INanoKontrollable {
 
         [SerializeField] protected Mesh quad;
         [SerializeField] protected ComputeShader particleUpdate;
@@ -59,7 +59,7 @@ namespace VJ.Channel18
                 bub.position = Random.insideUnitSphere * 100f;
                 bub.size = 1f;
                 bub.mass = Mathf.Lerp(massMin, massMax, Random.value);
-                bub.lifetime = Random.value;
+                bub.lifetime = 0f;
                 bubbles[i] = bub;
             }
             bubbleBuffer.SetData(bubbles);
@@ -101,6 +101,7 @@ namespace VJ.Channel18
                 var v = curve.Evaluate(t);
                 tex.SetPixel(x, 0, new Color(v, 0f, 0f));
             }
+            tex.wrapMode = TextureWrapMode.Clamp;
             tex.Apply();
             return tex;
         }
@@ -119,6 +120,31 @@ namespace VJ.Channel18
                 bubbleBuffer = null;
             }
         }
+
+        #region INanoKontrollable
+
+        public void NoteOn(int note)
+        {
+        }
+
+        public void NoteOff(int note)
+        {
+        }
+
+        public void Knob(int knobNumber, float knobValue)
+        {
+            switch(knobNumber)
+            {
+                case 0:
+                    buoyancy.y = knobValue * 15.1f;
+                    break;
+                case 16:
+                    throttle = Mathf.Clamp01(knobValue);
+                    break;
+            }
+        }
+
+        #endregion
 
         protected struct Bubble_t {
             public Vector3 position;

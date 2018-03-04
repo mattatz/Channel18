@@ -91,7 +91,7 @@
                 uint iid = unity_InstanceID;
                 size *= tex2Dlod(_SizeCurve, float4(_Bubbles[iid].lifetime, 0, 0, 0)).x;
             #endif
-                center.xy += (IN.uv - 0.5) * world.w * size;
+                center.xy += (IN.uv - 0.5) * saturate(world.w) * max(0, size);
 				OUT.vertex = mul(UNITY_MATRIX_P, center);
 				OUT.uv = IN.uv;
                 OUT.screenPos = ComputeGrabScreenPos(OUT.vertex);

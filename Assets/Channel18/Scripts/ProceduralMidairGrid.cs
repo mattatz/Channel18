@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 namespace VJ.Channel18
 {
 
-    public class ProceduralMidairGrid : ProceduralGrid {
+    public class ProceduralMidairGrid : ProceduralGrid, IOSCReactable {
 
         protected enum MidairMode
         {
@@ -278,6 +278,10 @@ namespace VJ.Channel18
                     }
                 }
             }
+        }
+
+        public void OnOSC(string address, List<object> data)
+        {
         }
 
         [StructLayout(LayoutKind.Sequential)]

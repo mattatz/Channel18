@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 namespace VJ.Channel18
 {
 
-    public class Monolith : MonoBehaviour {
+    public class Monolith : MonoBehaviour, IOSCReactable {
 
         [SerializeField] protected VoxelParticleSystem system;
         [SerializeField, Range(0f, 1f)] protected float minX = 0f, minY = 0f, minZ = 0f;
@@ -56,6 +56,10 @@ namespace VJ.Channel18
             minX = Mathf.Min(minX, maxX);
             minY = Mathf.Min(minY, maxY);
             minZ = Mathf.Min(minZ, maxZ);
+        }
+
+        public void OnOSC(string address, List<object> data)
+        {
         }
 
     }
