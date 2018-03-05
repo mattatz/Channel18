@@ -34,7 +34,7 @@ namespace VJ.Channel18
 
     #endregion
 
-    public class VoxelParticleSystem : MonoBehaviour, IOSCReactable {
+    public class VoxelParticleSystem : MonoBehaviour, IOSCReactable, INanoKontrollable {
 
         #region Accessors
 
@@ -348,6 +348,24 @@ namespace VJ.Channel18
         {
             particleUpdate.SetFloat("_FlowRandomThrottle", flowRandomThrottle);
             ComputeParticle(flowRandomKer);
+        }
+
+        public void NoteOn(int note)
+        {
+        }
+
+        public void NoteOff(int note)
+        {
+        }
+
+        public void Knob(int knobNumber, float value)
+        {
+            switch(knobNumber)
+            {
+                case 1:
+                    level = Mathf.FloorToInt(value * 4);
+                    break;
+            }
         }
 
         public void OnOSC(string address, List<object> data)

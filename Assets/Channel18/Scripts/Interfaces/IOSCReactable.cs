@@ -9,7 +9,7 @@ namespace VJ
     public interface IOSCReactable 
     {
 
-        void OnOSC(string addresss, List<object> data);
+        void OnOSC(string address, List<object> data);
 
     }
 

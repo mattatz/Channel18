@@ -5,10 +5,10 @@ using UnityEngine;
 namespace VJ.Channel18
 {
 
-    public class ProceduralFloorGrid : ProceduralGrid, IOSCReactable {
+    public class ProceduralFloorGrid : ProceduralGrid, IOSCReactable, INanoKontrollable, IAudioReactable {
 
         [SerializeField, Range(0f, 100f)] protected float plasticity = 10f;
-        [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f, noiseIntensity = 3f;
+        [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f, noiseIntensity = 100f, noiseIntensityMax = 300f;
         [SerializeField] protected float radius = 7.5f, thickness = 5f; 
 
         #region Shader property keys
@@ -204,6 +204,49 @@ namespace VJ.Channel18
 
         public void OnOSC(string address, List<object> data)
         {
+        }
+
+        public void NoteOn(int note) {
+            switch(note)
+            {
+                case 35:
+                    Noise();
+                    break;
+                case 51:
+                    break;
+                case 67:
+                    break;
+            }
+        }
+
+        public void NoteOff(int note) {
+        }
+
+        public void Knob(int knobNumber, float value)
+        {
+            switch(knobNumber)
+            {
+                case 3:
+                    noiseIntensity = Mathf.Lerp(0f, noiseIntensityMax, value);
+                    break;
+                case 35:
+                    if(value > 0f) Noise();
+                    break;
+                case 51:
+                    break;
+                case 67:
+                    break;
+            }
+        }
+
+        public void React(int index, bool on)
+        {
+            switch(index)
+            {
+                case 0:
+                    if (on) Noise();
+                    break;
+            }
         }
 
     }

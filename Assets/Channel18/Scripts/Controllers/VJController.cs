@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -21,12 +22,18 @@ namespace VJ.Channel18
     [System.Serializable]
     public class MidiKnobEvent : UnityEvent<int, float> {}
 
+    [System.Serializable]
+    public class AudioEvent : UnityEvent<int, bool> {}
+
     public class VJController : MonoBehaviour {
 
         [SerializeField] protected int port = 8888;
         [SerializeField] protected OSCEvent onOsc;
         [SerializeField] protected MidiNoteEvent onNoteOn, onNoteOff;
         [SerializeField] protected MidiKnobEvent onKnob;
+        [SerializeField] protected AudioEvent onAudio;
+
+        [SerializeField] protected List<AudioReaction> reactions;
 
         #region OSC variables
 
@@ -38,6 +45,34 @@ namespace VJ.Channel18
         void Start () {
             server = CreateServer("Channel18", port);
             packets = new List<OSCPacket>();
+
+            foreach(var go in GameObject.FindObjectsOfType<GameObject>())
+            {
+                var kontrollables = go.GetComponents<INanoKontrollable>();
+                if(kontrollables.Length > 0) {
+                    foreach(var kontrollable in kontrollables)
+                    {
+                        onNoteOn.AddListener(kontrollable.NoteOn);
+                        onNoteOff.AddListener(kontrollable.NoteOff);
+                        onKnob.AddListener(kontrollable.Knob);
+                    }
+                }
+
+                var oscReactables = go.GetComponents<IOSCReactable>();
+                if(oscReactables.Length > 0) {
+                    foreach(var oscReactable in oscReactables)
+                    {
+                        onOsc.AddListener(oscReactable.OnOSC);
+                    }
+                }
+
+                var audioReactables = go.GetComponents<IAudioReactable>();
+                if(audioReactables.Length > 0) {
+                    foreach(var audioReactable in audioReactables) {
+                        onAudio.AddListener(audioReactable.React);
+                    }
+                }
+            }
         }
         
         void Update () {
@@ -45,6 +80,19 @@ namespace VJ.Channel18
             {
                 var packet = packets[i];
                 onOsc.Invoke(packet.Address, packet.Data);
+
+                switch(packet.Address)
+                {
+                    case "/audio/fft/8":
+                        var spectrums = packet.Data.Select(d => float.Parse(d.ToString())).ToList();
+                        React(spectrums);
+                        break;
+
+                    case "/audio/fft/peaks":
+                        var peaks = packet.Data.Select(d => float.Parse(d.ToString())).ToList();
+                        Peak(peaks);
+                        break;
+                }
             }
             packets.Clear();
         }
@@ -115,6 +163,34 @@ namespace VJ.Channel18
         }
                
         #endregion
+
+        protected void React(List<float> spectrums)
+        {
+            int n = spectrums.Count, m = reactions.Count;
+            for(int i = 0; i < n && i < m; i++)
+            {
+                var s = spectrums[i];
+                var r = reactions[i];
+                if(r.Trigger(s)) {
+                    onAudio.Invoke(i, r.On);
+                }
+            }
+        }
+
+        protected void Peak(List<float> peaks)
+        {
+            int n = peaks.Count, m = reactions.Count;
+            for(int i = 0; i < n && i < m; i++)
+            {
+                var p = peaks[i];
+                var r = reactions[i];
+                r.Peak = p;
+                // force off
+                if(r.Trigger(0f)) {
+                    onAudio.Invoke(i, r.On);
+                }
+            }
+        }
 
     }
 
