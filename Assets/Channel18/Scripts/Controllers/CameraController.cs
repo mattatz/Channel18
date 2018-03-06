@@ -10,6 +10,7 @@ namespace VJ.Channel18
         [SerializeField] protected Transform center;
         [SerializeField] protected PolarCoordinate polar;
         [SerializeField] protected Vector3 offset;
+        [SerializeField, Range(0f, 5f)] protected float speed = 1f;
 
         void Start () {
         }
@@ -20,7 +21,7 @@ namespace VJ.Channel18
 
         void FixedUpdate()
         {
-            var dt = Time.fixedDeltaTime;
+            var dt = Time.fixedDeltaTime * speed;
             polar.Horizontal(dt);
         }
 

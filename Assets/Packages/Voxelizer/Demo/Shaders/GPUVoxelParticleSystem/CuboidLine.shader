@@ -11,6 +11,7 @@
 	{
 		Tags { "RenderType"="Opaque" "Queue"="Geometry" }
 		LOD 100
+        ZWrite On
 		Cull Off
 
 		Pass
