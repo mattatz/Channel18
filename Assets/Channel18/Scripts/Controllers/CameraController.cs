@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEngine.PostProcessing;
+
 namespace VJ.Channel18
 {
 
     public class CameraController : MonoBehaviour {
 
-        [SerializeField] protected Transform center;
+        [SerializeField] protected PostProcessingProfile profile;
+        [SerializeField] protected CameraTarget target;
         [SerializeField] protected PolarCoordinate polar;
         [SerializeField] protected Vector3 offset;
         [SerializeField, Range(0f, 5f)] protected float speed = 1f;
@@ -16,7 +19,8 @@ namespace VJ.Channel18
         }
         
         void Update () {
-            Apply();
+            var dt = Time.deltaTime;
+            Apply(dt);
         }
 
         void FixedUpdate()
@@ -25,11 +29,15 @@ namespace VJ.Channel18
             polar.Horizontal(dt);
         }
 
-        void Apply()
+        void Apply(float dt)
         {
-            var ct = polar.Cartesian;
-            transform.position = ct + offset;
-            transform.LookAt(center.position);
+            var ct = polar.Cartesian(target.Distance);
+            var to = ct + target.transform.position + offset;
+            transform.position = Vector3.Lerp(transform.position, to, dt);
+            transform.LookAt(target.transform.position);
+            var settings = profile.depthOfField.settings;
+            settings.focusDistance = (transform.position - target.transform.position).magnitude;
+            profile.depthOfField.settings = settings;
         }
 
     }

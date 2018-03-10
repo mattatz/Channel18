@@ -289,6 +289,7 @@ namespace VJ.Channel18
                     Apply(FloorMode.Noise);
                     break;
                 case 51:
+                    Apply(FloorMode.Circle);
                     break;
                 case 67:
                     break;
@@ -306,7 +307,6 @@ namespace VJ.Channel18
                     elevation = Mathf.Lerp(0f, elevationMax, value);
                     break;
                 case 35:
-                    if(value > 0f) Apply(FloorMode.Noise);
                     break;
                 case 51:
                     break;

@@ -35,11 +35,11 @@ namespace VJ.Channel18
         public void Randomize()
         {
             minX += (Random.value - 0.5f) * 0.5f;
-            maxX += (Random.value - 0.5f) * 0.5f;
+            maxX = minX + Random.value * (1f - minX);
             minY += (Random.value - 0.5f) * 0.5f;
-            maxY += (Random.value - 0.5f) * 0.5f;
+            maxY = minY + Random.value * (1f - minY);
             minZ += (Random.value - 0.5f) * 0.5f;
-            maxZ += (Random.value - 0.5f) * 0.5f;
+            maxZ = minZ + Random.value * (1f - minZ);
             Constrain();
             Clip();
         }

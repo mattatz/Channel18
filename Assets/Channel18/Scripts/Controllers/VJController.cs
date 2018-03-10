@@ -123,7 +123,7 @@ namespace VJ.Channel18
 
         void NoteOn(MidiChannel channel, int note, float velocity)
         {
-            // Debug.Log("NoteOn: " + channel + "," + note + "," + velocity);
+            Debug.Log("NoteOn: " + channel + "," + note + "," + velocity);
             onNoteOn.Invoke(note);
         }
 
@@ -135,7 +135,7 @@ namespace VJ.Channel18
 
         void Knob(MidiChannel channel, int knobNumber, float knobValue)
         {
-            // Debug.Log("Knob: " + knobNumber + "," + knobValue);
+            Debug.Log("Knob: " + knobNumber + "," + knobValue);
             onKnob.Invoke(knobNumber, knobValue);
         }
 

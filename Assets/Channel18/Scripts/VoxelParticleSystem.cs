@@ -251,8 +251,9 @@ namespace VJ.Channel18
                 data.Dispose();
                 data = null;
             }
+
 			// data = GPUVoxelizer.Voxelize(voxelizer, mesh, mesh.bounds, resolution, true, false);
-			data = GPUVoxelizer.Voxelize(voxelizer, mesh, bounds, resolution >> level, true, false, voxelVisible);
+			data = GPUVoxelizer.Voxelize(voxelizer, mesh, bounds, Mathf.Max(10, resolution) >> level, true, false, voxelVisible);
         }
 
         Mesh Sample()
