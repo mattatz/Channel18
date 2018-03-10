@@ -26,7 +26,7 @@ float _Size;
 
 #include "../Common/Quaternion.cginc"
 #include "../Common/Matrix.cginc"
-#include "../Common/ProceduralGrid.cginc"
+#include "../Common/ProceduralMidairGrid.cginc"
 
 StructuredBuffer<Grid> _Grids;
 

@@ -41,7 +41,10 @@ namespace VJ.Channel18
             // animator.SetTrigger(key);
             animators.ForEach(animator =>
             {
-                animator.SetTrigger(key);
+                if(animator.gameObject.activeInHierarchy)
+                {
+                    animator.SetTrigger(key);
+                }
             });
             motion = m;
         }
@@ -58,7 +61,9 @@ namespace VJ.Channel18
                     // animator.speed = Mathf.Lerp(animationSpeedMin, animationSpeedMax, knobValue); 
                     animators.ForEach(animator =>
                     {
-                        animator.speed = Mathf.Lerp(animationSpeedMin, animationSpeedMax, knobValue); 
+                        if (animator.gameObject.activeInHierarchy) { 
+                            animator.speed = Mathf.Lerp(animationSpeedMin, animationSpeedMax, knobValue);
+                        }
                     });
                     break;
                 case 17:

@@ -8,7 +8,7 @@
 #define THREAD [numthreads(8,1,1)]
 #define DISCARD if((int)id.x >= _InstancesCount) return;
 
-#include "../Common/ProceduralGrid.cginc"
+#include "../Common/ProceduralMidairGrid.cginc"
 #include "../Common/MidairSupport.cginc"
 #include "../Common/Random.cginc"
 #include "../Common/Quaternion.cginc"

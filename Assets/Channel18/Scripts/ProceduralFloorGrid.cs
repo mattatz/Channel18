@@ -1,52 +1,128 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace VJ.Channel18
 {
+    public enum FloorMode
+    {
+        Noise = 3,
+        Circle = 4,
+        Line = 5
+    };
 
     public class ProceduralFloorGrid : ProceduralGrid, IOSCReactable, INanoKontrollable, IAudioReactable {
 
         [SerializeField, Range(0f, 100f)] protected float plasticity = 10f;
-        [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f, noiseIntensity = 100f, noiseIntensityMax = 300f;
-        [SerializeField] protected float radius = 7.5f, thickness = 5f; 
+        [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f;
+        [SerializeField] protected float elevation = 100f, elevationMax = 300f;
+        [SerializeField] protected float radius = 7.5f, thickness = 5f;
+        [SerializeField] protected GradientTextureGen gradGen;
+
+        [SerializeField] protected Vector4 circle, line;
 
         #region Shader property keys
 
         protected const string kNoiseParamsKey = "_NoiseParams";
+        protected const string kElevationKey = "_Elevation";
         protected const string kPlasticityKey = "_Plasticity";
         protected const string kRadiusKey = "_Radius";
+        protected const string kGradientKey = "_Gradient";
 
         #endregion
 
-        protected Kernel updateKer, noiseKer;
+        protected Kernel updateKer;
+        protected Dictionary<FloorMode, Kernel> kernels;
+
+        protected Texture2D gradTex;
 
         protected override void Start () {
             base.Start();
 
             updateKer = new Kernel(compute, "Update");
-            noiseKer = new Kernel(compute, "Noise");
+            kernels = SetupFloorKernels();
+
+            gradTex = gradGen.Create(128, 1);
+
+            var grids = new FloorGrid_t[instancesCount];
+            var poffset = new Vector3(
+                -(width - 1) * 0.5f, -(height - 1) * 0.5f, -(depth - 1) * 0.5f
+            );
+            for(int z = 0; z < depth; z++)
+            {
+                var zoff = z * (width * height);
+                for(int y = 0; y < height; y++)
+                {
+                    var yoff = y * width;
+                    for(int x = 0; x < width; x++)
+                    {
+                        grids[x + yoff + zoff] = new FloorGrid_t(
+                            new Vector3(x, y, z) + poffset,
+                            Quaternion.identity,
+                            Vector3.one,
+                            Color.white,
+                            Mathf.Lerp(massMin, massMax, Random.value)
+                        );
+                    }
+                }
+            }
+            gridBuffer = new ComputeBuffer(instancesCount, Marshal.SizeOf(typeof(FloorGrid_t)));
+            gridBuffer.SetData(grids);
+        }
+
+        protected Dictionary<FloorMode, Kernel> SetupFloorKernels()
+        {
+            var kernels = new Dictionary<FloorMode, Kernel>();
+            foreach(FloorMode mode in Enum.GetValues(typeof(FloorMode)))
+            {
+                kernels.Add(mode, new Kernel(compute, Enum.GetName(typeof(FloorMode), mode)));
+            }
+            return kernels;
         }
 
         protected virtual void Update ()
         {
+            // if(Time.frameCount % 4 == 0) Apply(FloorMode.Line);
+
             compute.SetFloat(kPlasticityKey, plasticity);
             Compute(updateKer, Time.deltaTime);
             Render();
-
-            // if(Time.frameCount % 180 == 0) Noise();
         }
 
         protected override void Compute(Kernel kernel, float dt = 0f)
         {
+            compute.SetFloat(kElevationKey, elevation);
+            compute.SetTexture(kernel.Index, kGradientKey, gradTex);
             base.Compute(kernel, dt);
         }
 
-        public void Noise()
+        public void Apply(FloorMode mode)
         {
-            compute.SetVector(kNoiseParamsKey, new Vector4(noiseIntensity, noiseSpeed, noiseScale, 1f));
-            compute.SetVector(kRadiusKey, new Vector2(radius, radius + thickness));
-            Compute(noiseKer, Time.deltaTime);
+            switch(mode)
+            {
+                case FloorMode.Noise:
+                    compute.SetVector(kNoiseParamsKey, new Vector3(noiseSpeed, noiseScale, 1f));
+                    compute.SetVector(kRadiusKey, new Vector2(radius, radius + thickness));
+                    break;
+                case FloorMode.Circle:
+                    break;
+                case FloorMode.Line:
+                    var hw = width * 0.5f;
+                    var hd = depth * 0.5f;
+                    line.x = Random.Range(-hw, hw);
+                    line.y = Random.Range(-hd, hd);
+                    line.z = Random.Range(-hw, hw);
+                    line.w = Random.Range(-hd, hd);
+                    break;
+            }
+
+            compute.SetVector("_Circle", circle);
+            compute.SetVector("_Line", line);
+            Compute(kernels[mode], Time.deltaTime);
         }
 
         protected override Mesh Build()
@@ -210,7 +286,7 @@ namespace VJ.Channel18
             switch(note)
             {
                 case 35:
-                    Noise();
+                    Apply(FloorMode.Noise);
                     break;
                 case 51:
                     break;
@@ -227,10 +303,10 @@ namespace VJ.Channel18
             switch(knobNumber)
             {
                 case 3:
-                    noiseIntensity = Mathf.Lerp(0f, noiseIntensityMax, value);
+                    elevation = Mathf.Lerp(0f, elevationMax, value);
                     break;
                 case 35:
-                    if(value > 0f) Noise();
+                    if(value > 0f) Apply(FloorMode.Noise);
                     break;
                 case 51:
                     break;
@@ -244,12 +320,38 @@ namespace VJ.Channel18
             switch(index)
             {
                 case 0:
-                    if (on) Noise();
+                    if (on) Apply(FloorMode.Noise);
+                    break;
+
+                case 4:
+                    if (on) Apply(FloorMode.Line);
                     break;
             }
         }
 
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FloorGrid_t
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 scale;
+        public Color color;
+        public float duration;
+        public float mass;
+        public FloorGrid_t(Vector3 p, Quaternion q, Vector3 s, Color c, float dur = 0f, float m = 1f)
+        {
+            position = p;
+            rotation = q;
+            scale = s;
+            color = c;
+            duration = dur;
+            mass = m;
+        }
+    };
+
+
 
 }
 

@@ -316,7 +316,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbc49bd3d1efdf94ea4770e35ed3bcd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 95086880}
+  animators:
+  - {fileID: 95086880}
+  - {fileID: 1684664427}
   animationSpeedMin: 0.1
   animationSpeedMax: 2
   motion: 0
@@ -517,7 +519,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
       propertyPath: m_RootOrder
-      value: 9
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
       propertyPath: m_LocalScale.x
@@ -538,6 +540,18 @@ Prefab:
     - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 227.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 13700000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
@@ -672,7 +686,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &459535487
 MonoBehaviour:
@@ -1100,7 +1114,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 759422188}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8960ab31a45345e49a2d2d1f45dcc379, type: 3}
   m_Name: 
@@ -1674,6 +1688,11 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
   m_IsPrefabParent: 0
+--- !u!95 &1684664427 stripped
+Animator:
+  m_PrefabParentObject: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a,
+    type: 3}
+  m_PrefabInternal: {fileID: 297717152}
 --- !u!1 &1848063876
 GameObject:
   m_ObjectHideFlags: 0
@@ -1792,10 +1811,13 @@ MonoBehaviour:
   plasticity: 10
   noiseSpeed: 10
   noiseScale: 0.0015
-  noiseIntensity: 100
-  noiseIntensityMax: 300
+  elevation: 100
+  elevationMax: 300
   radius: 1
   thickness: 10
+  gradGen: {fileID: 11400000, guid: 6b7f7dd2408efef4d8dcdcfdf4d7c5c8, type: 2}
+  circle: {x: 0, y: 60, z: 120, w: 200}
+  line: {x: 0, y: 0, z: 180, w: 180}
 --- !u!1 &1992209503
 GameObject:
   m_ObjectHideFlags: 0

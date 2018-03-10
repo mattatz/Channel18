@@ -35,6 +35,7 @@ namespace VJ.Channel18
 
         protected const string kInstancesCountKey = "_InstancesCount";
         protected const string kWidthKey = "_Width", kHeightKey = "_Height", kDepthKey = "_Depth";
+        protected const string kMassMinKey = "_MassMin", kMassMaxKey = "_MassMax";
 
         #endregion
 
@@ -52,30 +53,6 @@ namespace VJ.Channel18
             args[1] = (uint)instancesCount;
             argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
             argsBuffer.SetData(args);
-
-            var grids = new Grid_t[instancesCount];
-            var poffset = new Vector3(
-                -(width - 1) * 0.5f, -(height - 1) * 0.5f, -(depth - 1) * 0.5f
-            );
-            for(int z = 0; z < depth; z++)
-            {
-                var zoff = z * (width * height);
-                for(int y = 0; y < height; y++)
-                {
-                    var yoff = y * width;
-                    for(int x = 0; x < width; x++)
-                    {
-                        grids[x + yoff + zoff] = new Grid_t(
-                            new Vector3(x, y, z) + poffset,
-                            Quaternion.identity,
-                            Vector3.one,
-                            Mathf.Lerp(massMin, massMax, Random.value)
-                        );
-                    }
-                }
-            }
-            gridBuffer = new ComputeBuffer(instancesCount, Marshal.SizeOf(typeof(Grid_t)));
-            gridBuffer.SetData(grids);
         }
 
         protected virtual void Compute(Kernel kernel, float dt = 0f)
@@ -85,6 +62,8 @@ namespace VJ.Channel18
             compute.SetInt(kWidthKey, width);
             compute.SetInt(kHeightKey, height);
             compute.SetInt(kDepthKey, depth);
+            compute.SetFloat(kMassMinKey, massMin);
+            compute.SetFloat(kMassMaxKey, massMax);
 
             var t = Time.timeSinceLevelLoad;
             compute.SetVector(kTimeKey, new Vector4(t / 20f, t, t * 2f, t * 3f));
@@ -118,22 +97,6 @@ namespace VJ.Channel18
         }
 
     }
-
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Grid_t
-    {
-        public Vector3 position;
-        public Quaternion rotation;
-        public Vector3 scale;
-        public float mass;
-        public Grid_t(Vector3 p, Quaternion q, Vector3 s, float m = 1f)
-        {
-            position = p;
-            rotation = q;
-            scale = s;
-            mass = m;
-        }
-    };
 
 }
 

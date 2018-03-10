@@ -2,6 +2,7 @@
 
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
+    _GradientHeight ("Gradient Height", Range(0, 100.0)) = 10.0
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
@@ -21,19 +22,21 @@
         #include "UnityCG.cginc"
         #include "../Common/Quaternion.cginc"
         #include "../Common/Matrix.cginc"
-        #include "../Common/ProceduralGrid.cginc"
+        #include "../Common/ProceduralFloorGrid.cginc"
 
 		sampler2D _MainTex;
 
 		struct Input {
 			float2 uv_MainTex;
+      float4 color;
 		};
 
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
+    float _GradientHeight;
 
-        float4x4 _LocalToWorld, _WorldToLocal;
+    float4x4 _LocalToWorld, _WorldToLocal;
 
 		UNITY_INSTANCING_BUFFER_START(Props)
 		UNITY_INSTANCING_BUFFER_END(Props)
@@ -58,9 +61,9 @@
         #endif
         }
 
-        void vert(inout appdata_full IN, out Input o)
+        void vert(inout appdata_full IN, out Input OUT)
         {
-            UNITY_INITIALIZE_OUTPUT(Input, o);
+            UNITY_INITIALIZE_OUTPUT(Input, OUT);
 
             // float l = (sin(_Time.y) + 1.0);
             // IN.vertex.xyz += IN.tangent.xyz * l;
@@ -68,11 +71,12 @@
             uint iid = unity_InstanceID;
             Grid grid = _Grids[iid];
             IN.vertex.xyz += IN.tangent.xyz * max(0, grid.scale.y - 1);
+            OUT.color = lerp(_Color, grid.color, smoothstep(1, _GradientHeight, grid.scale.y));
         #endif
         }
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
-			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * IN.color;
 			o.Albedo = c.rgb;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;

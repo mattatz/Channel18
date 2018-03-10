@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -15,10 +16,13 @@ namespace VJ.Channel18
         {
             base.OnInspectorGUI();
 
-            if(GUILayout.Button("Noise"))
+            foreach(FloorMode mode in Enum.GetValues(typeof(FloorMode)))
             {
-                var floor = target as ProceduralFloorGrid;
-                floor.Noise();
+                if(GUILayout.Button(mode.ToString()))
+                {
+                    var floor = target as ProceduralFloorGrid;
+                    floor.Apply(mode);
+                }
             }
         }
 

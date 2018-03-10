@@ -47,6 +47,31 @@ namespace VJ.Channel18
             setupRotKer = new Kernel(compute, "SetupRotate");
             rotKer = new Kernel(compute, "Rotate");
             autoRotKer = new Kernel(compute, "RotateAuto");
+
+            var grids = new MidairGrid_t[instancesCount];
+            var poffset = new Vector3(
+                -(width - 1) * 0.5f, -(height - 1) * 0.5f, -(depth - 1) * 0.5f
+            );
+            for(int z = 0; z < depth; z++)
+            {
+                var zoff = z * (width * height);
+                for(int y = 0; y < height; y++)
+                {
+                    var yoff = y * width;
+                    for(int x = 0; x < width; x++)
+                    {
+                        grids[x + yoff + zoff] = new MidairGrid_t(
+                            new Vector3(x, y, z) + poffset,
+                            Quaternion.identity,
+                            Vector3.one,
+                            Color.white,
+                            Mathf.Lerp(massMin, massMax, Random.value)
+                        );
+                    }
+                }
+            }
+            gridBuffer = new ComputeBuffer(instancesCount, Marshal.SizeOf(typeof(MidairGrid_t)));
+            gridBuffer.SetData(grids);
         }
 
         protected virtual void Update ()
@@ -294,6 +319,24 @@ namespace VJ.Channel18
         };
 
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MidairGrid_t
+    {
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 scale;
+        public Color color;
+        public float mass;
+        public MidairGrid_t(Vector3 p, Quaternion q, Vector3 s, Color c, float m = 1f)
+        {
+            position = p;
+            rotation = q;
+            scale = s;
+            color = c;
+            mass = m;
+        }
+    };
 
 }
 

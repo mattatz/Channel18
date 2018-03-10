@@ -1,27 +1,37 @@
 ﻿#pragma kernel Setup
 #pragma kernel Update
 #pragma kernel Noise
+#pragma kernel Circle
+#pragma kernel Line
 
 #define THREAD [numthreads(8,1,1)]
 #define DISCARD if((int)id.x >= _InstancesCount) return;
 
-#include "../Common/ProceduralGrid.cginc"
+#include "../Common/ProceduralFloorGrid.cginc"
 
 #include "../Common/Noise/ClassicNoise2D.cginc"
 #define noise2D cnoise
 #include "../Common/FBM.cginc"
+#include "../Common/Random.cginc"
 
 RWStructuredBuffer<Grid> _Grids;
 
 int _InstancesCount;
 int _Width, _Height, _Depth;
+float _MassMin, _MassMax;
 
 float4 _Time;
 float _DT;
 
-half _Plasticity;
-half4 _NoiseParams;
-half2 _Radius;
+float _Plasticity;
+float3 _NoiseParams;
+float _Elevation;
+float2 _Radius;
+
+float4 _Circle, _Line;
+
+Texture2D<float4> _Gradient;
+SamplerState _LinearRepeat, _LinearMirror;
 
 THREAD
 void Setup (uint3 id : SV_DispatchThreadID)
@@ -35,7 +45,10 @@ void Update (uint3 id : SV_DispatchThreadID)
     DISCARD
 
     Grid grid = _Grids[id.x];
-    grid.scale = lerp(grid.scale, float3(1, 1, 1), _DT * grid.mass * _Plasticity);
+    grid.duration = max(0, grid.duration - _DT);
+    float t = saturate(_DT * grid.mass * _Plasticity);
+    t *= step(grid.duration, 0);
+    grid.scale = lerp(grid.scale, float3(1, 1, 1), t);
     _Grids[id.x] = grid;
 }
 
@@ -46,11 +59,71 @@ void Noise (uint3 id : SV_DispatchThreadID)
 
     Grid grid = _Grids[id.x];
 
-    float2 seed = grid.position.xz * _NoiseParams.z + float2(_DT, _Time.x * _NoiseParams.y);
+    float2 seed = grid.position.xz * _NoiseParams.y + float2(_DT, _Time.x * _NoiseParams.x);
     float l = length(grid.position.xz);
     float s = smoothstep(_Radius.x, _Radius.y, l);
-    float n = max(0, fbm_pattern(seed)) * _NoiseParams.x;
+    float p = max(0, fbm_pattern(seed));
+    float n = p * _Elevation;
     grid.scale = float3(1, max(0, n * s), 1);
+
+    float flag = step(0, p);
+
+    // grid.color = lerp(grid.color, _Gradient.SampleLevel(_LinearRepeat, float2(nrand(id.xy, _Time.x), 0.5), 0), flag);
+    grid.color = lerp(grid.color, _Gradient.SampleLevel(_LinearMirror, float2(cnoise(grid.position.xz * 0.02), 0.5), 0), flag);
+    grid.duration = 0;
+    grid.mass = lerp(grid.mass, lerp(_MassMin, _MassMax, saturate(nrand(id.yx, _Time.y))), flag);
+
+    _Grids[id.x] = grid;
+}
+
+THREAD
+void Circle (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+
+    float l = length(grid.position.xz);
+    // float s = smoothstep(_Radius.x, _Radius.y, l);
+    float s = smoothstep(_Circle.x, _Circle.y, l) * smoothstep(_Circle.w, _Circle.z, l);
+    s += (cnoise(grid.position.xz * 0.02 + float2(_Time.y, _Time.x)) - 0.5) * 0.2;
+    grid.scale = float3(1, max(0, saturate(s) * _Elevation * 0.25), 1);
+    grid.color = _Gradient.SampleLevel(_LinearMirror, float2(s + _Time.x, 0.5), 0);
+    grid.duration = 0;
+    grid.mass = lerp(_MassMin, _MassMax, saturate(nrand(id.yx, _Time.y)));
+
+    _Grids[id.x] = grid;
+}
+
+THREAD
+void Line (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+
+    float2 p = grid.position.xz;
+    float2 a = _Line.xy;
+    float2 b = _Line.zw;
+    float2 pa = p - a;
+    float2 ba = b - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    float d = length(pa - ba * h);
+
+    float hl = length(ba) * 0.5;
+    float pal = saturate(length(pa) / hl);
+    float pbl = saturate(length(p - b) / hl);
+    float tri = min(pal, pbl);
+    float t = saturate(1.0 - d);
+    float flag = step(0.25, t);
+
+    // float s = clamp(((1.0 - d) - 0.99) * 100.0, 0.0, 1.0) * 100.0;
+    float s = flag * sin(tri * PI * 0.5) * _Elevation * 0.25 * nrand(id.xy, _Time.xy);
+
+    grid.scale = lerp(grid.scale, float3(1, s, 1), flag);
+    grid.color = lerp(grid.color, float4(1, 1, 1, 1), flag);
+    grid.duration = lerp(grid.duration, 0.1, flag);
+    grid.mass = lerp(grid.mass, 10, flag);
 
     _Grids[id.x] = grid;
 }
