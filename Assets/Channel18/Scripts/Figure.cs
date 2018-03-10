@@ -21,7 +21,8 @@ namespace VJ.Channel18
 
         public FigureMotion Motion { get { return motion; } }
 
-        [SerializeField] protected Animator animator;
+        /// [SerializeField] protected Animator animator;
+        [SerializeField] protected List<Animator> animators;
         [SerializeField] protected float animationSpeedMin = 0.1f, animationSpeedMax = 2f;
         [SerializeField] protected FigureMotion motion = FigureMotion.Idle;
 
@@ -37,7 +38,11 @@ namespace VJ.Channel18
             if (m == motion) return;
 
             var key = Enum.GetName(typeof(FigureMotion), (int)m);
-            animator.SetTrigger(key);
+            // animator.SetTrigger(key);
+            animators.ForEach(animator =>
+            {
+                animator.SetTrigger(key);
+            });
             motion = m;
         }
 
@@ -50,7 +55,11 @@ namespace VJ.Channel18
             switch(knobNumber)
             {
                 case 2:
-                    animator.speed = Mathf.Lerp(animationSpeedMin, animationSpeedMax, knobValue); 
+                    // animator.speed = Mathf.Lerp(animationSpeedMin, animationSpeedMax, knobValue); 
+                    animators.ForEach(animator =>
+                    {
+                        animator.speed = Mathf.Lerp(animationSpeedMin, animationSpeedMax, knobValue); 
+                    });
                     break;
                 case 17:
                     var index = Mathf.Clamp(Mathf.FloorToInt(motions.Length * knobValue), 0, motions.Length - 1);
