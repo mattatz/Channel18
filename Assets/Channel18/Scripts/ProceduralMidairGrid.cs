@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 namespace VJ.Channel18
 {
 
-    public class ProceduralMidairGrid : ProceduralGrid, IOSCReactable {
+    public class ProceduralMidairGrid : ProceduralGrid, IOSCReactable, INanoKontrollable {
 
         protected enum MidairMode
         {
@@ -19,6 +19,8 @@ namespace VJ.Channel18
 
         [SerializeField, Range(0f, 1f)] protected float extrusion = 0.05f, thickness = 0.001f;
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.5f;
+
+        protected float _extrusion, _thickness;
 
         protected ComputeBuffer supportBuffer;
 
@@ -36,8 +38,8 @@ namespace VJ.Channel18
         {
             base.Start();
 
-            supportBuffer = new ComputeBuffer(instancesCount, Marshal.SizeOf(typeof(SupportData_t)));
-            var supportData = new SupportData_t[instancesCount];
+            supportBuffer = new ComputeBuffer(instancesCount, Marshal.SizeOf(typeof(MidairSupportData_t)));
+            var supportData = new MidairSupportData_t[instancesCount];
             supportBuffer.SetData(supportData);
 
             updateKer = new Kernel(compute, "Update");
@@ -76,8 +78,13 @@ namespace VJ.Channel18
 
         protected virtual void Update ()
         {
-            // Compute(autoRotKer, Time.deltaTime * 5f);
-            Compute(updateKer, Time.deltaTime);
+            var dt = Time.deltaTime;
+            // Compute(autoRotKer, dt * 5f);
+            Compute(updateKer, dt);
+
+            _extrusion = Mathf.Lerp(_extrusion, extrusion, dt);
+            _thickness = Mathf.Lerp(_thickness, thickness, dt);
+
             Render();
         }
 
@@ -94,8 +101,8 @@ namespace VJ.Channel18
         protected override void Render()
         {
             render.SetBuffer(kGridsKey, gridBuffer);
-            render.SetFloat(kExtrusionKey, extrusion);
-            render.SetFloat(kThicknessKey, thickness);
+            render.SetFloat(kExtrusionKey, _extrusion);
+            render.SetFloat(kThicknessKey, _thickness);
 
             Graphics.DrawMesh(mesh, transform.localToWorldMatrix, render, 0, null, 0, null, shadowCasting, receiveShadow);
         }
@@ -144,6 +151,8 @@ namespace VJ.Channel18
             compute.SetFloat("_T", 1f);
             Compute(kernel, Time.deltaTime);
         }
+
+        #region Build mesh
 
         protected override Mesh Build()
         {
@@ -305,20 +314,41 @@ namespace VJ.Channel18
             }
         }
 
+        #endregion
+
         public void OnOSC(string address, List<object> data)
         {
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        protected struct SupportData_t
+        #region IKorgKontrollable interfaces
+
+        public void NoteOn(int note)
         {
-            float extrusion, thickness;
-            Quaternion prevRot, toRot;
-            float time;
-            int flag;
-        };
+        }
+
+        public void NoteOff(int note)
+        {
+        }
+
+        public void Knob(int knobNumber, float knobValue)
+        {
+            switch(knobNumber)
+            {
+                case 4:
+                    thickness = knobValue;
+                    break;
+
+                case 20:
+                    extrusion = knobValue;
+                    break;
+            }
+        }
+
+        #endregion
 
     }
+
+    #region Define structures
 
     [StructLayout(LayoutKind.Sequential)]
     public struct MidairGrid_t
@@ -337,6 +367,18 @@ namespace VJ.Channel18
             mass = m;
         }
     };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MidairSupportData_t
+    {
+        float extrusion, thickness;
+        Quaternion prevRot, toRot;
+        float time;
+        float offset;
+        int flag;
+    };
+
+    #endregion
 
 }
 

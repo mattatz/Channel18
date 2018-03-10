@@ -56,6 +56,7 @@ void SetupRotSupport(in Grid grid, inout Support sup, float2 seed) {
     sup.prevRotation = grid.rotation;
     sup.toRotation = qmul(grid.rotation, rotate_angle_axis(HALF_PI, random_orth(seed)));
     sup.time = 0;
+    sup.offset = 0;
 }
 
 THREAD
@@ -66,10 +67,14 @@ void SetupRotate (uint3 id : SV_DispatchThreadID)
     Grid grid = _Grids[id.x];
     Support sup = _SupportData[id.x];
     float2 seed = id.xy + float2(0, _Time.y);
-    if ((sup.flag == 0) && nrand(seed) < _Throttle) {
+    if (sup.flag == 0) {
+      if (nrand(seed) < _Throttle) {
         float2 seed2 = id.yx + float2(_Time.y, _DT);
         SetupRotSupport(grid, sup, seed2);
         sup.flag = 1;
+      }
+    } else {
+      sup.offset = sup.time;
     }
     _SupportData[id.x] = sup;
 }
@@ -83,9 +88,9 @@ void Rotate (uint3 id : SV_DispatchThreadID)
     Support sup = _SupportData[id.x];
     if (sup.flag == 1) {
         float speed = grid.mass;
-        float t = (_T + _T * speed);
-        float tt = ease_out_quad(saturate(t));
-        grid.rotation = q_slerp(sup.prevRotation, sup.toRotation, tt);
+        float t = sup.offset + (_T + _T * speed);
+        sup.time = t;
+        grid.rotation = q_slerp(sup.prevRotation, sup.toRotation, ease_out_quad(saturate(sup.time)));
         sup.flag = (t <= 1.0) ? 1 : 0;
     }
     _Grids[id.x] = grid;

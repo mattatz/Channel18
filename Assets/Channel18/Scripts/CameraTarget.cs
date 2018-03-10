@@ -23,13 +23,19 @@ namespace VJ.Channel18
 
     public class CameraTarget : MonoBehaviour {
 
+        public Vector3 Position
+        {
+            get { return locations[current].Position; }
+        }
+
         public float Distance
         {
-            get { return locations[current].Distance; }
+            get { return locations[current].Distance + distanceNoiseGen.Value(Time.timeSinceLevelLoad, 0f); }
         }
 
         [SerializeField] List<CameraTargetLocation> locations;
         [SerializeField] protected int current;
+        [SerializeField] protected NoiseGen distanceNoiseGen;
 
         void Start () {
         }

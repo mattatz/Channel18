@@ -11,6 +11,7 @@ Shader"VJ/Channel18/MidairGrid"
 
         [Space]
         _Size ("Size", Range(0.0, 1.0)) = 0.5
+        _Distance ("Distance", Range(0.0, 100.0)) = 50.0
         _Extrusion ("Extrusion", Range(0.0, 1.0)) = 0.25
         _Thickness ("Thickness", Range(0.0, 1.0)) = 0.01
     }

@@ -22,7 +22,7 @@ half _Metallic;
 
 half _Extrusion, _Thickness;
 
-float _Size;
+float _Size, _Distance;
 
 #include "../Common/Quaternion.cginc"
 #include "../Common/Matrix.cginc"
@@ -34,6 +34,7 @@ StructuredBuffer<Grid> _Grids;
 struct Attributes
 {
     float4 position : POSITION;
+    float distance : TEXCOORD0;
     float4 rotation : TANGENT;
     float2 scale : NORMAL;
 };
@@ -66,6 +67,10 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
     input.position.xyz = grid.position.xyz;
     input.rotation = grid.rotation;
     input.scale.xy = grid.scale.xy;
+
+    float3 vp = UnityObjectToViewPos(float4(grid.position.xyz, 1)).xyz;
+    input.distance = length(vp) / _Distance;
+
     return input;
 }
 
@@ -79,7 +84,7 @@ Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
 
 #if defined(PASS_CUBE_SHADOWCASTER)
     // Cube map shadow caster pass: Transfer the shadow vector.
-    o.position = UnityObjectToClipPos(float4(wpos, 1));
+    o.position = UnityWorldToClipPos(float4(wpos, 1));
     o.shadow = wpos - _LightPositionRange.xyz;
 
 #elif defined(UNITY_PASS_SHADOWCASTER)
@@ -116,7 +121,7 @@ void addFace (inout TriangleStream<Varyings> OUT, float4 p[4], float3 normal)
     OUT.RestartStrip();
 }
 
-void addCube(float3 pos, float3 right, float3 up, float3 forward, inout TriangleStream<Varyings> OUT)
+void addCube (float3 pos, float3 right, float3 up, float3 forward, inout TriangleStream<Varyings> OUT)
 {
     float4 v[4];
 
@@ -166,7 +171,7 @@ void addCube(float3 pos, float3 right, float3 up, float3 forward, inout Triangle
 [maxvertexcount(72)]
 void Geometry (point Attributes IN[1], inout TriangleStream<Varyings> OUT) {
     float3 pos = IN[0].position.xyz;
-    float hs = _Size * 0.5f;
+    float hs = _Size * 0.5f * saturate(IN[0].distance);
     float3 right = rotate_vector(float3(1, 0, 0), IN[0].rotation) * hs;
     float3 up = rotate_vector(float3(0, 1, 0), IN[0].rotation) * hs;
     float3 forward = rotate_vector(float3(0, 0, 1), IN[0].rotation) * hs;

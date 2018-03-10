@@ -211,7 +211,7 @@ MonoBehaviour:
   mesh: {fileID: 0}
   render: {fileID: 2100000, guid: 65cfc88567ed5c94dadddb4b5a1bb969, type: 2}
   compute: {fileID: 7200000, guid: f533876d301e0404daddc735f5208ac3, type: 3}
-  shadowCasting: 0
+  shadowCasting: 1
   receiveShadow: 1
   massMin: 0.27
   massMax: 1
@@ -480,8 +480,12 @@ MonoBehaviour:
     distance: 22
   - label: Body
     position: {x: 0, y: 27.1, z: 0}
-    distance: 30
-  current: 40
+    distance: 40
+  current: 0
+  distanceNoiseGen:
+    valueMin: -10
+    valueMax: 10
+    scale: 0.25
 --- !u!33 &152096829
 MeshFilter:
   m_ObjectHideFlags: 0

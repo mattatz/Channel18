@@ -67,10 +67,10 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Scale: 0.991
+    - _Scale: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _Speed: 0.095
+    - _Speed: 0.227
     - _SrcBlend: 1
     - _T: 0
     - _UVSec: 0
