@@ -40,12 +40,25 @@ namespace VJ.Channel18
 
         public ParticleMode PMode {
             get { return particleMode; }
-            set { particleMode = value; }
+            set {
+                particleMode = value;
+            }
         }
 
         public VoxelMode VMode {
             get { return voxelMode; }
-            set { voxelMode = value; }
+            set {
+                voxelMode = value;
+                switch(voxelMode)
+                {
+                    case VoxelMode.Randomize:
+                        Randomize();
+                        break;
+                    case VoxelMode.Glitch:
+                        Glitch();
+                        break;
+                }
+            }
         }
 
         public Bounds BaseClipBounds {
@@ -175,13 +188,15 @@ namespace VJ.Channel18
                 Voxelize(cached, bounds);
             }
 
-            if(flowRandom && Time.frameCount % flowRandomFreq == 0) FlowRandom();
+            // if(flowRandom && Time.frameCount % flowRandomFreq == 0) FlowRandom();
+
+            var dt = Time.deltaTime;
 
             if(voxelMode != VoxelMode.Default) {
-                ComputeVoxel(voxelKernels[voxelMode], 0f);
+                ComputeVoxel(voxelKernels[voxelMode], dt);
             }
 
-            ComputeParticle(particleKernels[particleMode], Time.deltaTime);
+            ComputeParticle(particleKernels[particleMode], dt);
             block.SetBuffer(kParticleBufferKey, particleBuffer);
             renderer.SetPropertyBlock(block);
         }
@@ -353,14 +368,16 @@ namespace VJ.Channel18
 
         public void Randomize()
         {
-            Voxelize(cached, bounds);
-            ComputeVoxel(voxelKernels[VoxelMode.Randomize], 0f);
+            voxelControl.SetFloat("_Seed", Random.value);
+            // Voxelize(cached, bounds);
+            // ComputeVoxel(voxelKernels[VoxelMode.Randomize], 0f);
         }
 
         public void Glitch()
         {
-            Voxelize(cached, bounds);
-            ComputeVoxel(voxelKernels[VoxelMode.Glitch], 0f);
+            voxelControl.SetFloat("_Seed", Random.value);
+            // Voxelize(cached, bounds);
+            // ComputeVoxel(voxelKernels[VoxelMode.Glitch], 0f);
         }
 
         public void Clip(Vector3 min, Vector3 max)
@@ -379,6 +396,23 @@ namespace VJ.Channel18
 
         public void NoteOn(int note)
         {
+            switch(note)
+            {
+                case 33:
+                    FlowRandom();
+                    break;
+                case 49:
+                    break;
+                case 65:
+                    break;
+
+                case 34:
+                    break;
+                case 50:
+                    break;
+                case 66:
+                    break;
+            }
         }
 
         public void NoteOff(int note)
@@ -398,7 +432,27 @@ namespace VJ.Channel18
         public override void OnOSC(string address, List<object> data)
         {
             base.OnOSC(address, data);
+
+            switch(address)
+            {
+                case "/voxel/particle/mode":
+                    PMode = (ParticleMode)OSCUtils.GetIValue(data);
+                    break;
+
+                case "/voxel/control/mode":
+                    VMode = (VoxelMode)OSCUtils.GetIValue(data);
+                    break;
+
+                case "/voxel/flow":
+                    FlowRandom();
+                    break;
+
+                case "/voxel/flow/throttle":
+                    flowRandomThrottle = OSCUtils.GetFValue(data);
+                    break;
+            }
         }
+
         protected override void React(int index, bool on)
         {
         }

@@ -61,6 +61,13 @@ namespace VJ.Channel18
         public override void OnOSC(string address, List<object> data)
         {
             base.OnOSC(address, data);
+
+            switch(address)
+            {
+                case "/monolith/randomize":
+                    Randomize();
+                    break;
+            }
         }
 
         protected override void React(int index, bool on)

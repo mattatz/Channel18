@@ -93,7 +93,7 @@ namespace VoxelSystem {
 			voxelizer.SetBuffer(kernel.Index, kTriBufferKey, triBuffer);
 			voxelizer.SetBuffer(kernel.Index, kVoxelBufferKey, voxelBuffer);
 
-			voxelizer.Dispatch(kernel.Index, w / (int)kernel.ThreadX + 1, h / (int)kernel.ThreadY + 1, (int)kernel.ThreadZ);
+            voxelizer.Dispatch(kernel.Index, w / (int)kernel.ThreadX + 1, h / (int)kernel.ThreadY + 1, (int)kernel.ThreadZ);
 
 			// dispose
 			vertBuffer.Release();

@@ -18,16 +18,19 @@ namespace VJ.Channel18
             var system = target as VoxelParticleSystem;
             var pNames = Enum.GetNames(typeof(ParticleMode));
             var pSelected = GUILayout.SelectionGrid((int)system.PMode, pNames, 2);
-            if(pSelected != (int)system.PMode)
-            {
+            if(pSelected != (int)system.PMode) {
                 system.PMode = (ParticleMode)pSelected;
             }
 
             var vNames = Enum.GetNames(typeof(VoxelMode));
             var vSelected = GUILayout.SelectionGrid((int)system.VMode, vNames, 2);
-            if(vSelected != (int)system.VMode)
-            {
+            if(vSelected != (int)system.VMode) {
                 system.VMode = (VoxelMode)vSelected;
+            }
+
+            if(GUILayout.Button("FlowRandom"))
+            {
+                system.FlowRandom();
             }
 
         }

@@ -19,6 +19,21 @@ namespace VJ {
             return def;
         }
 
+        public static float GetFValue(List<object> data, int index = 0, float def = 0f)
+        {
+            if(data.Count <= index) {
+                return def;
+            }
+
+            float result;
+            if(float.TryParse(data[index].ToString(), out result)) {
+                return result;
+            }
+            return def;
+        }
+
+
+
         public static bool GetBoolFlag(List<object> data, int index = 0, bool def = false)
         {
             if(data.Count <= index) {

@@ -8,6 +8,7 @@
 #include "UnityCG.cginc"
 #include "Assets/Packages/Voxelizer/Shaders/Voxel.cginc"
 #include "../Common/Random.cginc"
+#include "../Common/Noise/SimplexNoise3D.cginc"
 
 CBUFFER_START(VoxelParams)
 
@@ -20,6 +21,7 @@ float _DT;
 float _Throttle;
 
 float3 _ClipMin, _ClipMax;
+float _Seed;
 
 CBUFFER_END
 
@@ -72,8 +74,7 @@ void Glitch (uint3 id : SV_DispatchThreadID)
     if(x >= _Width) return;
     if(y >= _Height) return;
 
-    float seed = nrand(id.xy);
-
+    float seed = nrand(id.xy + float2(_Seed, 0));
     for (int z = _Depth - 1; z >= 0; z--)
     {
         uint vid = get_voxel_index(x, y, z);
