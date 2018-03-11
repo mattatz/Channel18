@@ -15,7 +15,7 @@ namespace VJ.Channel18
         Line = 5
     };
 
-    public class ProceduralFloorGrid : ProceduralGrid, IOSCReactable, INanoKontrollable, IAudioReactable {
+    public class ProceduralFloorGrid : ProceduralGrid, INanoKontrollable {
 
         [SerializeField, Range(0f, 100f)] protected float plasticity = 10f;
         [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f;
@@ -278,8 +278,14 @@ namespace VJ.Channel18
             }
         }
 
-        public void OnOSC(string address, List<object> data)
+        public override void OnOSC(string address, List<object> data)
         {
+            base.OnOSC(address, data);
+            switch(address)
+            {
+                case "/floor/color":
+                    break;
+            }
         }
 
         public void NoteOn(int note) {
@@ -315,7 +321,7 @@ namespace VJ.Channel18
             }
         }
 
-        public void React(int index, bool on)
+        protected override void React(int index, bool on)
         {
             switch(index)
             {
@@ -328,7 +334,6 @@ namespace VJ.Channel18
                     break;
             }
         }
-
     }
 
     [StructLayout(LayoutKind.Sequential)]

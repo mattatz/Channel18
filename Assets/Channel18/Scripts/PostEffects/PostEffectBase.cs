@@ -6,15 +6,9 @@ namespace VJ.Channel18
 {
 
     [RequireComponent (typeof(Camera))]
-    public class PostEffectBase : MonoBehaviour {
+    public abstract class PostEffectBase : AudioReactor {
 
         [SerializeField] protected Material material;
-
-        protected virtual void Start () {
-        }
-        
-        protected virtual void Update () {
-        }
 
         protected virtual void OnRenderImage (RenderTexture src, RenderTexture dst)
         {

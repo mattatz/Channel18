@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 namespace VJ.Channel18
 {
 
-    public abstract class ProceduralGrid : MonoBehaviour {
+    public abstract class ProceduralGrid : AudioReactor {
 
         [SerializeField, Range(1, 512)] protected int width = 128, height = 128, depth = 1;
 

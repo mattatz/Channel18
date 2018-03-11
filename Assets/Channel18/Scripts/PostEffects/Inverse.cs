@@ -5,10 +5,15 @@ using UnityEngine;
 namespace VJ.Channel18
 {
 
-    public class Inverse : PostEffectBase, IOSCReactable, IAudioReactable {
+    public class Inverse : PostEffectBase {
 
-        public void OnOSC(string address, List<object> data)
+        protected void Start()
         {
+        }
+
+        public override void OnOSC(string address, List<object> data)
+        {
+            base.OnOSC(address, data);
             switch(address)
             {
                 case "/posteffects/inverse":
@@ -16,8 +21,7 @@ namespace VJ.Channel18
             }
         }
 
-        public void React(int index, bool on)
-        {
+        protected override void React(int index, bool on) {
             switch(index)
             {
                 case 7:

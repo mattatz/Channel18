@@ -11,7 +11,7 @@ using UnityEngine.Rendering;
 namespace VJ.Channel18
 {
 
-    public class ProceduralMidairGrid : ProceduralGrid, IOSCReactable, INanoKontrollable {
+    public class ProceduralMidairGrid : ProceduralGrid, INanoKontrollable {
 
         protected enum MidairMode
         {
@@ -316,8 +316,9 @@ namespace VJ.Channel18
 
         #endregion
 
-        public void OnOSC(string address, List<object> data)
+        public override void OnOSC(string address, List<object> data)
         {
+            base.OnOSC(address, data);
         }
 
         #region IKorgKontrollable interfaces
@@ -342,6 +343,10 @@ namespace VJ.Channel18
                     extrusion = knobValue;
                     break;
             }
+        }
+
+        protected override void React(int index, bool on)
+        {
         }
 
         #endregion

@@ -33,7 +33,7 @@ namespace VJ
 
     public interface IAudioReactable {
 
-        void React(int index, bool on);
+        void OnReact(int index, bool on);
 
     }
 

@@ -34,7 +34,7 @@ namespace VJ.Channel18
 
     #endregion
 
-    public class VoxelParticleSystem : MonoBehaviour, IOSCReactable, INanoKontrollable {
+    public class VoxelParticleSystem : AudioReactor, INanoKontrollable {
 
         #region Accessors
 
@@ -164,25 +164,7 @@ namespace VJ.Channel18
 
             Setup();
         }
-
-        void SetupParticleKernels()
-        {
-            particleKernels = new Dictionary<ParticleMode, Kernel>();
-            foreach(ParticleMode mode in Enum.GetValues(typeof(ParticleMode)))
-            {
-                particleKernels.Add(mode, new Kernel(particleUpdate, Enum.GetName(typeof(ParticleMode), mode)));
-            }
-        }
-
-        void SetupVoxelKernels()
-        {
-            voxelKernels = new Dictionary<VoxelMode, Kernel>();
-            foreach(VoxelMode mode in Enum.GetValues(typeof(VoxelMode)))
-            {
-                voxelKernels.Add(mode, new Kernel(voxelControl, Enum.GetName(typeof(VoxelMode), mode)));
-            }
-        }
-      
+     
         protected void Update () {
             if(Time.frameCount % frame == 0)
             {
@@ -204,6 +186,13 @@ namespace VJ.Channel18
             renderer.SetPropertyBlock(block);
         }
 
+        void OnDrawGizmosSelected()
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.matrix = transform.localToWorldMatrix;
+            Gizmos.DrawWireCube(bounds.center, bounds.size);
+        }
+
         void OnDestroy ()
         {
             if(data != null)
@@ -220,6 +209,8 @@ namespace VJ.Channel18
         }
 
         #endregion
+
+        #region Initialization
 
         void Setup()
         {
@@ -238,6 +229,41 @@ namespace VJ.Channel18
 
             particleUpdate.Dispatch(setupKer.Index, particleBuffer.count / (int)setupKer.ThreadX + 1, (int)setupKer.ThreadY, (int)setupKer.ThreadZ);
         }
+
+        Mesh BuildPoints(int count)
+        {
+            var indices = new int[count];
+            for (int i = 0; i < count; i++) indices[i] = i;
+
+            var mesh = new Mesh();
+			mesh.indexFormat = IndexFormat.UInt32;
+            mesh.vertices = new Vector3[count];
+            mesh.SetIndices(indices, MeshTopology.Points, 0);
+            mesh.RecalculateBounds();
+            mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000f);
+            return mesh;
+        }
+
+        void SetupParticleKernels()
+        {
+            particleKernels = new Dictionary<ParticleMode, Kernel>();
+            foreach(ParticleMode mode in Enum.GetValues(typeof(ParticleMode)))
+            {
+                particleKernels.Add(mode, new Kernel(particleUpdate, Enum.GetName(typeof(ParticleMode), mode)));
+            }
+        }
+
+        void SetupVoxelKernels()
+        {
+            voxelKernels = new Dictionary<VoxelMode, Kernel>();
+            foreach(VoxelMode mode in Enum.GetValues(typeof(VoxelMode)))
+            {
+                voxelKernels.Add(mode, new Kernel(voxelControl, Enum.GetName(typeof(VoxelMode), mode)));
+            }
+        }
+ 
+
+        #endregion
 
         Vector4 GetTime(float t)
         {
@@ -369,29 +395,12 @@ namespace VJ.Channel18
             }
         }
 
-        public void OnOSC(string address, List<object> data)
+        public override void OnOSC(string address, List<object> data)
         {
+            base.OnOSC(address, data);
         }
-
-        Mesh BuildPoints(int count)
+        protected override void React(int index, bool on)
         {
-            var indices = new int[count];
-            for (int i = 0; i < count; i++) indices[i] = i;
-
-            var mesh = new Mesh();
-			mesh.indexFormat = IndexFormat.UInt32;
-            mesh.vertices = new Vector3[count];
-            mesh.SetIndices(indices, MeshTopology.Points, 0);
-            mesh.RecalculateBounds();
-            mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000f);
-            return mesh;
-        }
-
-        void OnDrawGizmosSelected()
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.matrix = transform.localToWorldMatrix;
-            Gizmos.DrawWireCube(bounds.center, bounds.size);
         }
 
     }

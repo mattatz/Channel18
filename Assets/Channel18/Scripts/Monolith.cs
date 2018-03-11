@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 namespace VJ.Channel18
 {
 
-    public class Monolith : MonoBehaviour, IOSCReactable {
+    public class Monolith : AudioReactor {
 
         [SerializeField] protected VoxelParticleSystem system;
         [SerializeField, Range(0f, 1f)] protected float minX = 0f, minY = 0f, minZ = 0f;
@@ -58,7 +58,12 @@ namespace VJ.Channel18
             minZ = Mathf.Min(minZ, maxZ);
         }
 
-        public void OnOSC(string address, List<object> data)
+        public override void OnOSC(string address, List<object> data)
+        {
+            base.OnOSC(address, data);
+        }
+
+        protected override void React(int index, bool on)
         {
         }
 

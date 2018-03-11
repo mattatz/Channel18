@@ -69,7 +69,7 @@ namespace VJ.Channel18
                 var audioReactables = go.GetComponents<IAudioReactable>();
                 if(audioReactables.Length > 0) {
                     foreach(var audioReactable in audioReactables) {
-                        onAudio.AddListener(audioReactable.React);
+                        onAudio.AddListener(audioReactable.OnReact);
                     }
                 }
             }

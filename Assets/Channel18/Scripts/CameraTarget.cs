@@ -21,7 +21,7 @@ namespace VJ.Channel18
         [SerializeField] protected float distance = 30f;
     }
 
-    public class CameraTarget : MonoBehaviour {
+    public class CameraTarget : MonoBehaviour, IOSCReactable {
 
         public Vector3 Position
         {
@@ -30,21 +30,29 @@ namespace VJ.Channel18
 
         public float Distance
         {
-            get { return locations[current].Distance + distanceNoiseGen.Value(Time.timeSinceLevelLoad, 0f); }
+            get { return distance + distanceNoiseGen.Value(Time.timeSinceLevelLoad, 0f); }
         }
 
         [SerializeField] List<CameraTargetLocation> locations;
         [SerializeField] protected int current;
         [SerializeField] protected NoiseGen distanceNoiseGen;
+        [SerializeField] protected float distance;
 
         void Start () {
+            current = Mathf.Clamp(current, 0, locations.Count - 1);
+            var location = locations[current];
+            transform.position = location.Position;
+            distance = location.Distance;
         }
         
         void Update () {
             current = Mathf.Clamp(current, 0, locations.Count - 1);
             var location = locations[current];
-            var p = Vector3.Lerp(transform.position, location.Position, Time.deltaTime);
+
+            var dt = Time.deltaTime;
+            var p = Vector3.Lerp(transform.position, location.Position, dt);
             transform.position = p;
+            distance = Mathf.Lerp(distance, location.Distance, dt);
         }
 
         protected void OnDrawGizmos()
@@ -56,6 +64,16 @@ namespace VJ.Channel18
 #endif
                 Gizmos.DrawWireSphere(loc.Position, 1f);
             });
+        }
+
+        public void OnOSC(string address, List<object> data)
+        {
+            switch(address)
+            {
+                case "/camera/target/index":
+                    current = OSCUtils.GetIValue(data, 0);
+                    break;
+            }
         }
 
     }
