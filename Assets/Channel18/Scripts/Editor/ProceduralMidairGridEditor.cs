@@ -14,14 +14,16 @@ namespace VJ.Channel18
         {
             base.OnInspectorGUI();
 
+            var grid = target as ProceduralMidairGrid;
             if(GUILayout.Button("Init"))
             {
-                var grid = target as ProceduralMidairGrid;
                 grid.Init();
             } else if(GUILayout.Button("Rotate"))
             {
-                var grid = target as ProceduralMidairGrid;
                 grid.Rotate();
+            } else if(GUILayout.Button("Scale"))
+            {
+                grid.Scale();
             }
         }
 

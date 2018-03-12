@@ -1,18 +1,12 @@
-// - Sources:
-//      Standard geometry shader example
-//      https://github.com/keijiro/StandardGeometryShader
 
 #include "UnityCG.cginc"
 #include "UnityGBuffer.cginc"
 #include "UnityStandardUtils.cginc"
 
-// Cube map shadow caster; Used to render point light shadows on platforms
-// that lacks depth cube map support.
 #if defined(SHADOWS_CUBE) && !defined(SHADOWS_CUBE_IN_DEPTH_TEX)
 #define PASS_CUBE_SHADOWCASTER
 #endif
 
-// Shader uniforms
 half4 _Color;
 sampler2D _MainTex;
 float4 _MainTex_ST;
@@ -30,7 +24,6 @@ float _Size, _Distance;
 
 StructuredBuffer<Grid> _Grids;
 
-// Vertex input attributes
 struct Attributes
 {
     float4 position : POSITION;
@@ -39,27 +32,19 @@ struct Attributes
     float2 scale : NORMAL;
 };
 
-// Fragment varyings
 struct Varyings
 {
     float4 position : SV_POSITION;
 
 #if defined(PASS_CUBE_SHADOWCASTER)
-    // Cube map shadow caster pass
     float3 shadow : TEXCOORD0;
 #elif defined(UNITY_PASS_SHADOWCASTER)
-    // Default shadow caster pass
 #else
-    // GBuffer construction pass
     float3 normal : NORMAL;
     half3 ambient : TEXCOORD1;
     float3 wpos : TEXCOORD2;
 #endif
 };
-
-//
-// Vertex stage
-//
 
 Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 {
@@ -73,10 +58,6 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 
     return input;
 }
-
-//
-// Geometry stage
-//
 
 Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
 {
@@ -199,16 +180,13 @@ half4 Fragment(Varyings input) : SV_Target
 
 #elif defined(UNITY_PASS_SHADOWCASTER)
 
-// Default shadow caster pass
 half4 Fragment() : SV_Target { return 0; }
 
 #else
 
-// GBuffer construction pass
 void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 outGBuffer1 : SV_Target1, out half4 outGBuffer2 : SV_Target2, out half4 outEmission : SV_Target3) {
     half3 albedo = _Color.rgb;
 
-    // PBS workflow conversion (metallic -> specular)
     half3 c_diff, c_spec;
     half refl10;
     c_diff = DiffuseAndSpecularFromMetallic(
@@ -216,7 +194,6 @@ void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 out
         c_spec, refl10 // output
     );
 
-    // Update the GBuffer.
     UnityStandardData data;
     data.diffuseColor = c_diff;
     data.occlusion = 1.0;
@@ -225,7 +202,6 @@ void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 out
     data.normalWorld = input.normal;
     UnityStandardDataToGbuffer(data, outGBuffer0, outGBuffer1, outGBuffer2);
 
-    // Calculate ambient lighting and output to the emission buffer.
     half3 sh = ShadeSHPerPixel(data.normalWorld, input.ambient, input.wpos);
     outEmission = half4(sh * c_diff, 1);
 }

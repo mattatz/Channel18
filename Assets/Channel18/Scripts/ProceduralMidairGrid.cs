@@ -17,16 +17,25 @@ namespace VJ.Channel18
         {
         };
 
+        [SerializeField, Range(0.1f, 1f)] protected float duration = 0.5f;
         [SerializeField, Range(0f, 1f)] protected float extrusion = 0.05f, thickness = 0.001f;
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.5f;
+        [SerializeField] protected Vector4 wave;
+        [SerializeField] protected Vector3 force;
+        [SerializeField] protected float forceDistance = 3f;
 
         protected float _extrusion, _thickness;
 
         protected ComputeBuffer supportBuffer;
 
-        protected Kernel updateKer, 
+        protected Kernel 
             setupInitKer, initKer,
-            setupRotKer, rotKer, autoRotKer;
+            setupRotKer, rotKer, autoRotKer,
+            setupScaleKer, scaleKer,
+            waveXKer, waveYKer,
+            forceKer,
+            wobbleKer
+            ;
 
         protected const string kSupportDataKey = "_SupportData";
         protected const string kExtrusionKey = "_Extrusion", kThicknessKey = "_Thickness";
@@ -42,13 +51,21 @@ namespace VJ.Channel18
             var supportData = new MidairSupportData_t[instancesCount];
             supportBuffer.SetData(supportData);
 
-            updateKer = new Kernel(compute, "Update");
-
             setupInitKer = new Kernel(compute, "SetupInit");
             initKer = new Kernel(compute, "Init");
+
             setupRotKer = new Kernel(compute, "SetupRotate");
             rotKer = new Kernel(compute, "Rotate");
             autoRotKer = new Kernel(compute, "RotateAuto");
+
+            setupScaleKer = new Kernel(compute, "SetupScale");
+            scaleKer = new Kernel(compute, "Scale");
+            waveXKer = new Kernel(compute, "WaveX");
+            waveYKer = new Kernel(compute, "WaveY");
+
+            forceKer = new Kernel(compute, "Force");
+
+            wobbleKer = new Kernel(compute, "Wobble");
 
             var grids = new MidairGrid_t[instancesCount];
             var poffset = new Vector3(
@@ -79,11 +96,16 @@ namespace VJ.Channel18
         protected virtual void Update ()
         {
             var dt = Time.deltaTime;
-            // Compute(autoRotKer, dt * 5f);
-            Compute(updateKer, dt);
-
             _extrusion = Mathf.Lerp(_extrusion, extrusion, dt);
             _thickness = Mathf.Lerp(_thickness, thickness, dt);
+
+            compute.SetVector("_Wave", wave);
+            compute.SetVector("_Force", new Vector4(force.x, force.y, force.z, 1f / forceDistance));
+            // Compute(waveXKer, dt);
+            // Compute(waveYKer, dt);
+            // Compute(forceKer, dt);
+            // Compute(autoRotKer, dt * 5f);
+            // Compute(wobbleKer, dt);
 
             Render();
         }
@@ -111,6 +133,9 @@ namespace VJ.Channel18
         {
             compute.SetBuffer(kernel.Index, kSupportDataKey, supportBuffer);
             compute.SetFloat(kThrottleKey, throttle);
+            compute.SetFloat("_InvWidth", 1f / width);
+            compute.SetFloat("_InvHeight", 1f / height);
+            compute.SetFloat("_InvDepth", 1f / depth);
             base.Compute(kernel, dt);
         }
 
@@ -124,17 +149,21 @@ namespace VJ.Channel18
             Animate(setupRotKer, rotKer);
         }
 
+        public void Scale()
+        {
+            Animate(setupScaleKer, scaleKer);
+        }
+
         void Animate(Kernel setupKer, Kernel animateKer)
         {
             Compute(setupKer, Time.deltaTime);
-            if(animationCo != null)
-            {
+            if(animationCo != null) {
                 StopCoroutine(animationCo);
             }
-            animationCo = StartCoroutine(IAnimator(animateKer, 0.5f));
+            animationCo = StartCoroutine(IAnimator(animateKer, duration));
         }
 
-        IEnumerator IAnimator(Kernel kernel, float duration)
+        IEnumerator IAnimator(Kernel kernel, float duration, Action callback = null)
         {
             yield return 0;
 
@@ -150,6 +179,8 @@ namespace VJ.Channel18
 
             compute.SetFloat("_T", 1f);
             Compute(kernel, Time.deltaTime);
+
+            if (callback != null) callback();
         }
 
         #region Build mesh
@@ -319,12 +350,35 @@ namespace VJ.Channel18
         public override void OnOSC(string address, List<object> data)
         {
             base.OnOSC(address, data);
+
+            switch(address)
+            {
+                case "/midair/duration":
+                    duration = Mathf.Max(0.1f, OSCUtils.GetFValue(data));
+                    break;
+
+                case "/midair/throttle":
+                    throttle = Mathf.Max(0.1f, OSCUtils.GetFValue(data));
+                    break;
+            }
         }
 
         #region IKorgKontrollable interfaces
 
         public void NoteOn(int note)
         {
+            switch(note)
+            {
+                case 36:
+                    Init();
+                    break;
+                case 52:
+                    Rotate();
+                    break;
+                case 68:
+                    Scale();
+                    break;
+            }
         }
 
         public void NoteOff(int note)
@@ -378,6 +432,7 @@ namespace VJ.Channel18
     {
         float extrusion, thickness;
         Quaternion prevRot, toRot;
+        Vector2 prevScale, toScale;
         float time;
         float offset;
         int flag;

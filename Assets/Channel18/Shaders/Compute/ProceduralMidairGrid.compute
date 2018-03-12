@@ -1,9 +1,18 @@
 ﻿#pragma kernel SetupInit
 #pragma kernel Init
-#pragma kernel Update
+
 #pragma kernel SetupRotate
 #pragma kernel Rotate
 #pragma kernel RotateAuto
+
+#pragma kernel SetupScale
+#pragma kernel Scale
+#pragma kernel WaveX
+#pragma kernel WaveY
+
+#pragma kernel Force
+
+#pragma kernel Wobble
 
 #define THREAD [numthreads(8,1,1)]
 #define DISCARD if((int)id.x >= _InstancesCount) return;
@@ -11,6 +20,7 @@
 #include "../Common/ProceduralMidairGrid.cginc"
 #include "../Common/MidairSupport.cginc"
 #include "../Common/Random.cginc"
+#include "../Common/Noise/SimplexNoise3D.cginc"
 #include "../Common/Quaternion.cginc"
 #include "../Common/Easing.cginc"
 
@@ -34,27 +44,44 @@ THREAD
 void SetupInit (uint3 id : SV_DispatchThreadID)
 {
     DISCARD
+
+    Grid grid = _Grids[id.x];
+    Support sup = _SupportData[id.x];
+	sup.prevScale.xy = grid.scale.xy;
+	sup.toScale.xy = float2(1, 1);
+	sup.prevRotation = grid.rotation;
+	sup.toRotation = grid.rotation;
+	sup.time = 0;
+	sup.offset = 0;
+    _SupportData[id.x] = sup;
 }
 
 THREAD
 void Init (uint3 id : SV_DispatchThreadID)
 {
     DISCARD
-}
-
-THREAD
-void Update (uint3 id : SV_DispatchThreadID)
-{
-    DISCARD
 
     Grid grid = _Grids[id.x];
-    // grid.scale.x = (sin(_Time.y) + 1.0) * 0.5;
+    Support sup = _SupportData[id.x];
+	float t = sup.offset + (_T + _T * grid.mass);
+	sup.time = t;
+	grid.scale.xy = lerp(sup.prevScale.xy, sup.toScale.xy, ease_out_quad(saturate(sup.time)));
+	// grid.rotation = q_slerp(sup.prevRotation, sup.toRotation, ease_out_quad(saturate(sup.time)));
+	grid.rotation = QUATERNION_IDENTITY;
     _Grids[id.x] = grid;
 }
 
 void SetupRotSupport(in Grid grid, inout Support sup, float2 seed) {
     sup.prevRotation = grid.rotation;
     sup.toRotation = qmul(grid.rotation, rotate_angle_axis(HALF_PI, random_orth(seed)));
+    sup.time = 0;
+    sup.offset = 0;
+}
+
+void SetupScaleSupport(in Grid grid, inout Support sup, float2 seed) {
+    sup.prevScale.xy = grid.scale.xy;
+    // sup.toScale.xy = float2(nrand(seed.xy), nrand(seed.yx));
+    sup.toScale.xy = float2(step(_Throttle, nrand(seed.xy)), grid.scale.y);
     sup.time = 0;
     sup.offset = 0;
 }
@@ -87,8 +114,7 @@ void Rotate (uint3 id : SV_DispatchThreadID)
     Grid grid = _Grids[id.x];
     Support sup = _SupportData[id.x];
     if (sup.flag == 1) {
-        float speed = grid.mass;
-        float t = sup.offset + (_T + _T * speed);
+        float t = sup.offset + (_T + _T * grid.mass);
         sup.time = t;
         grid.rotation = q_slerp(sup.prevRotation, sup.toRotation, ease_out_quad(saturate(sup.time)));
         sup.flag = (t <= 1.0) ? 1 : 0;
@@ -119,4 +145,100 @@ void RotateAuto (uint3 id : SV_DispatchThreadID)
     _SupportData[id.x] = sup;
     _Grids[id.x] = grid;
 }
+
+THREAD
+void SetupScale (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+    Support sup = _SupportData[id.x];
+    float2 seed = id.xy + float2(0, _Time.y);
+    if (sup.flag == 0) {
+      if (nrand(seed) < _Throttle) {
+        float2 seed2 = id.yx + float2(_Time.y, _DT);
+        SetupScaleSupport(grid, sup, seed2);
+        sup.flag = 1;
+      }
+    } else {
+      sup.offset = sup.time;
+    }
+	grid.rotation = QUATERNION_IDENTITY;
+	_Grids[id.x] = grid;
+    _SupportData[id.x] = sup;
+}
+
+THREAD
+void Scale (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+    Support sup = _SupportData[id.x];
+    if (sup.flag == 1) {
+        float t = sup.offset + (_T + _T * grid.mass);
+        sup.time = t;
+        grid.scale.xy = lerp(sup.prevScale.xy, sup.toScale.xy, ease_out_quad(saturate(sup.time)));
+        sup.flag = (t <= 1.0) ? 1 : 0;
+    }
+    _Grids[id.x] = grid;
+    _SupportData[id.x] = sup;
+}
+
+float4 _Wave;
+float _InvWidth, _InvHeight, _InvDepth;
+
+THREAD
+void WaveX (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+	float seed = nrand(grid.position.yz);
+	float s = (sin(grid.position.x * _InvWidth * PI * _Wave.x + seed * _Wave.y + _Time.y * _Wave.z) + 1.0) * 0.5;
+	// grid.scale.xy = lerp(float2(s, 1), float2(0, 0), step(_Throttle, seed));
+	grid.scale.xy = float2(s, 1);
+    _Grids[id.x] = grid;
+}
+
+THREAD
+void WaveY (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+	float seed = 0.0;
+	float s = (sin(grid.position.y * _InvWidth * PI * _Wave.x + seed * _Wave.y + _Time.y * _Wave.z) + 1.0) * 0.5;
+	grid.scale.xy = float2(s, 1);
+    _Grids[id.x] = grid;
+}
+
+float4 _Force;
+
+THREAD
+void Force (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+	float l = length(grid.position.xyz - _Force.xyz) * _Force.w;
+	// grid.scale.xy = float2(s, 1);
+	// grid.scale.xy = lerp(float2(0, 0), float2(1, 1), saturate(1.0 - l));
+	grid.scale.x = lerp(0, 1, saturate(1.0 - l));
+    _Grids[id.x] = grid;
+}
+
+THREAD
+void Wobble (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD
+
+    Grid grid = _Grids[id.x];
+	// float s = nrand(grid.position.xy, _Time.x);
+	float s = snoise(grid.position.xyz + float3(0, _Time.x, 0)).x;
+	grid.scale.xy = step(_Throttle, s);
+    _Grids[id.x] = grid;
+}
+
+
 

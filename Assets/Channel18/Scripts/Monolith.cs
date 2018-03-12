@@ -10,6 +10,7 @@ namespace VJ.Channel18
     public class Monolith : AudioReactor {
 
         [SerializeField] protected VoxelParticleSystem system;
+        [SerializeField, Range(0f, 1f)] protected float limit = 0.15f;
         [SerializeField, Range(0f, 1f)] protected float minX = 0f, minY = 0f, minZ = 0f;
         [SerializeField, Range(0f, 1f)] protected float maxX = 1f, maxY = 1f, maxZ = 1f;
         [SerializeField] protected bool useRandom = false;
@@ -34,12 +35,12 @@ namespace VJ.Channel18
 
         public void Randomize()
         {
-            minX += (Random.value - 0.5f) * 0.5f;
-            maxX = minX + Random.value * (1f - minX);
-            minY += (Random.value - 0.5f) * 0.5f;
-            maxY = minY + Random.value * (1f - minY);
-            minZ += (Random.value - 0.5f) * 0.5f;
-            maxZ = minZ + Random.value * (1f - minZ);
+            minX = Random.value;
+            maxX = minX + limit + Random.value * (1f - minX - limit);
+            minY = Random.value;
+            maxY = minY + limit + Random.value * (1f - minY - limit);
+            minZ = Random.value;
+            maxZ = minZ + limit + Random.value * (1f - minZ - limit);
             Constrain();
             Clip();
         }
@@ -66,6 +67,9 @@ namespace VJ.Channel18
             {
                 case "/monolith/randomize":
                     Randomize();
+                    break;
+
+                case "/monolith/":
                     break;
             }
         }
