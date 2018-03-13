@@ -9,6 +9,7 @@ namespace VJ.Channel18
 
     public class CameraController : MonoBehaviour, IOSCReactable, INanoKontrollable {
 
+        [SerializeField] new protected Camera camera;
         [SerializeField] protected PostProcessingProfile profile;
         [SerializeField] protected CameraTarget target;
         [SerializeField] protected PolarCoordinate polar;
@@ -46,15 +47,15 @@ namespace VJ.Channel18
         {
             var ct = polar.Cartesian(target.Distance + Mathf.Lerp(distanceMin, distanceMax, distance), Mathf.Lerp(angleMin, angleMax, angle));
             var to = ct + target.transform.position + offset;
-            transform.position = Vector3.Lerp(transform.position, to, dt);
+            camera.transform.position = Vector3.Lerp(camera.transform.position, to, dt);
             Look();
         }
 
         protected void Look()
         {
-            transform.LookAt(target.transform.position);
+            camera.transform.LookAt(target.transform.position);
             var settings = profile.depthOfField.settings;
-            settings.focusDistance = (transform.position - target.transform.position).magnitude;
+            settings.focusDistance = (camera.transform.position - target.transform.position).magnitude;
             profile.depthOfField.settings = settings;
         }
 
