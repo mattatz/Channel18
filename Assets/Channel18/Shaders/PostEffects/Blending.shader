@@ -58,7 +58,7 @@
 
                 float r = _ScreenParams.x / _ScreenParams.y;
                 float x = uv.x * r, y = uv.y;
-                float2 displacement = snoise(float3(float2(x, y) * _Scale.xy, _Time.y * _Speed)).xy;
+                float2 displacement = (snoise(float3(float2(x, y) * _Scale.xy, _Time.y * _Speed)).xy - 0.5);
                 fixed4 col = tex2D(_Gradient, uv + displacement);
                 return fixed4(lerp(source.rgb, BlendLighten(source.rgb, col.rgb), _T), 1);
             }

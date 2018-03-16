@@ -9,11 +9,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c533d7024964103498d3e75ebaa841c7, type: 3}
-  m_Name: BackgroundGradient
+  m_Name: BlendingGradient
   m_EditorClassIdentifier: 
   grad:
     serializedVersion: 2
-    key0: {r: 0.1764706, g: 0.12941177, b: 0.20000002, a: 1}
+    key0: {r: 0.1712644, g: 0.113793135, b: 0.20000005, a: 1}
     key1: {r: 0.2784314, g: 0.18431373, b: 0.19215688, a: 1}
     key2: {r: 0.24313727, g: 0.22352943, b: 0.3019608, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}

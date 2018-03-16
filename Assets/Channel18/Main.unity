@@ -235,7 +235,7 @@ Transform:
   m_LocalScale: {x: 16, y: 16, z: 16}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &54014480 stripped
 SkinnedMeshRenderer:
@@ -360,7 +360,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &100928079
 MonoBehaviour:
@@ -519,6 +519,46 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &165462891
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 165462892}
+  - component: {fileID: 165462893}
+  m_Layer: 0
+  m_Name: Lattice
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &165462892
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 165462891}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &165462893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 165462891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73c61288b6f10454ba7706ec2f92cac4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &297717152
 Prefab:
   m_ObjectHideFlags: 0
@@ -556,7 +596,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
       propertyPath: m_RootOrder
-      value: 13
+      value: 14
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
       propertyPath: m_LocalScale.x
@@ -727,7 +767,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &459535487
 MonoBehaviour:
@@ -886,7 +926,7 @@ Transform:
   m_LocalScale: {x: 1000, y: 1000, z: 1000}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!1 &526633971
 GameObject:
@@ -1275,7 +1315,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 759422188}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1340eab6775799f4b8b9b769b4cb93b0, type: 3}
   m_Name: 
@@ -1283,7 +1323,7 @@ MonoBehaviour:
   audioAddress: /effect/audio
   reactive: 0
   material: {fileID: 2100000, guid: 1dad66e12ccd15f4aa3bd64edd38b3b7, type: 2}
-  gradientGen: {fileID: 11400000, guid: 0d120a7784c852f4eaa3b244b9591715, type: 2}
+  gradientGen: {fileID: 11400000, guid: 91d56296f88eba94ebfd105ebcfc5622, type: 2}
 --- !u!1 &853375731
 GameObject:
   m_ObjectHideFlags: 0
@@ -1480,7 +1520,7 @@ Transform:
   - {fileID: 1246479306}
   - {fileID: 634477495}
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 227.2, z: 0}
 --- !u!114 &1001449983
 MonoBehaviour:
@@ -1606,7 +1646,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1146033638}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8960ab31a45345e49a2d2d1f45dcc379, type: 3}
   m_Name: 
@@ -1853,7 +1893,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
       propertyPath: m_RootOrder
-      value: 14
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 9500000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
       propertyPath: m_Controller
