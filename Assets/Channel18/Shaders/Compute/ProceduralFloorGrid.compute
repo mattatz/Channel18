@@ -59,7 +59,7 @@ void Noise (uint3 id : SV_DispatchThreadID)
 
     Grid grid = _Grids[id.x];
 
-    float2 seed = grid.position.xz * _NoiseParams.y + float2(_DT, _Time.x * _NoiseParams.x);
+    float2 seed = grid.position.xz * _NoiseParams.y + float2(_DT, _Time.y * _NoiseParams.x);
     float l = length(grid.position.xz);
     float s = smoothstep(_Radius.x, _Radius.y, l);
     float p = max(0, fbm_pattern(seed));
@@ -117,7 +117,7 @@ void Line (uint3 id : SV_DispatchThreadID)
     float t = saturate(1.0 - d);
     float flag = step(0.25, t);
 
-    // float s = clamp(((1.0 - d) - 0.99) * 100.0, 0.0, 1.0) * 100.0;
+    // float s = flag * _Elevation * 0.25 * nrand(id.xy, _Time.xy);
     float s = flag * sin(tri * PI * 0.5) * _Elevation * 0.25 * nrand(id.xy, _Time.xy);
 
     grid.scale = lerp(grid.scale, float3(1, s, 1), flag);

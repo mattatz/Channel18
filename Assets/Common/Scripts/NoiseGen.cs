@@ -10,11 +10,11 @@ namespace VJ.Channel18
     public class NoiseGen {
 
         [SerializeField] protected float valueMin, valueMax;
-        [SerializeField] protected float scale;
+        [SerializeField] protected float scale, offset;
 
         public float Value(float x, float y)
         {
-            return Mathf.Lerp(valueMin, valueMax, Mathf.PerlinNoise(x * scale, y * scale));
+            return Mathf.Lerp(valueMin, valueMax, Mathf.PerlinNoise(x * scale + offset, y * scale));
         }
 
     }

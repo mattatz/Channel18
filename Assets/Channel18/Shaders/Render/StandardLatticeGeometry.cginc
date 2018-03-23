@@ -11,26 +11,17 @@ half4 _Color;
 sampler2D _MainTex;
 float4 _MainTex_ST;
 
-half _Glossiness;
-half _Metallic;
-
-half _Extrusion, _Thickness;
-
-float _Size, _Distance;
+float _Glossiness;
+float _Metallic;
+float _Thickness;
 
 #include "../Common/Quaternion.cginc"
 #include "../Common/Matrix.cginc"
-#include "../Common/ProceduralMidairGrid.cginc"
 #include "./Lattice.cginc"
-
-StructuredBuffer<Grid> _Grids;
 
 struct Attributes
 {
     float4 position : POSITION;
-    float distance : TEXCOORD0;
-    float4 rotation : TANGENT;
-    float2 scale : NORMAL;
 };
 
 struct Varyings
@@ -49,17 +40,7 @@ struct Varyings
 
 Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 {
-    Grid grid = _Grids[vid];
-
-    // input.position.xyz = grid.position.xyz;
-    input.position.xyz = lattice_position(grid.position.xyz);
-
-    input.rotation = grid.rotation;
-    input.scale.xy = grid.scale.xy;
-
-    float3 vp = UnityObjectToViewPos(float4(grid.position.xyz, 1)).xyz;
-    input.distance = length(vp) / _Distance;
-
+    input.position.xyz = lattice_position(input.position.xyz);
     return input;
 }
 
@@ -89,9 +70,8 @@ Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
     return o;
 }
 
-void addFace (inout TriangleStream<Varyings> OUT, float4 p[4], float3 normal)
+void add_face(inout TriangleStream<Varyings> OUT, float4 p[4], float3 wnrm)
 {
-    float3 wnrm = UnityObjectToWorldNormal(normal);
     Varyings o = VertexOutput(o, p[0], wnrm);
     OUT.Append(o);
 
@@ -103,70 +83,68 @@ void addFace (inout TriangleStream<Varyings> OUT, float4 p[4], float3 normal)
 
     o = VertexOutput(o, p[3], wnrm);
     OUT.Append(o);
+
     OUT.RestartStrip();
 }
 
-void addCube (float3 pos, float3 right, float3 up, float3 forward, inout TriangleStream<Varyings> OUT)
-{
+[maxvertexcount(72)]
+void Geometry (in line Attributes IN[2], inout TriangleStream<Varyings> OUT) {
+    float3 pos = (IN[0].position.xyz + IN[1].position.xyz) * 0.5;
+    float3 tangent = (IN[1].position.xyz - pos);
+    float3 forward = normalize(tangent) * (length(tangent) + _Thickness);
+    float3 nforward = normalize(forward);
+    float3 ntmp = cross(nforward, float3(1, 1, 1));
+    float3 up = (cross(ntmp, nforward));
+    float3 nup = normalize(up);
+    float3 right = (cross(nforward, nup));
+    float3 nright = normalize(right);
+
+    up = nup * _Thickness;
+    right = nright * _Thickness;
+
     float4 v[4];
 
-	// forward
+    // forward
     v[0] = float4(pos + forward + right - up, 1.0f);
     v[1] = float4(pos + forward + right + up, 1.0f);
     v[2] = float4(pos + forward - right - up, 1.0f);
     v[3] = float4(pos + forward - right + up, 1.0f);
-    addFace(OUT, v, normalize(forward));
+    add_face(OUT, v, nforward);
 
-	// back
+    // back
     v[0] = float4(pos - forward - right - up, 1.0f);
     v[1] = float4(pos - forward - right + up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos - forward + right + up, 1.0f);
-    addFace(OUT, v, -normalize(forward));
+    add_face(OUT, v, -nforward);
 
-	// up
+    // up
     v[0] = float4(pos - forward + right + up, 1.0f);
     v[1] = float4(pos - forward - right + up, 1.0f);
     v[2] = float4(pos + forward + right + up, 1.0f);
     v[3] = float4(pos + forward - right + up, 1.0f);
-    addFace(OUT, v, normalize(up));
+    add_face(OUT, v, nup);
 
-	// down
+    // down
     v[0] = float4(pos + forward + right - up, 1.0f);
     v[1] = float4(pos + forward - right - up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos - forward - right - up, 1.0f);
-    addFace(OUT, v, -normalize(up));
+    add_face(OUT, v, -nup);
 
-	// left
+    // left
     v[0] = float4(pos + forward - right - up, 1.0f);
     v[1] = float4(pos + forward - right + up, 1.0f);
     v[2] = float4(pos - forward - right - up, 1.0f);
     v[3] = float4(pos - forward - right + up, 1.0f);
-    addFace(OUT, v, -normalize(right));
+    add_face(OUT, v, -nright);
 
-	// right
+    // right
     v[0] = float4(pos - forward + right + up, 1.0f);
     v[1] = float4(pos + forward + right + up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos + forward + right - up, 1.0f);
-    addFace(OUT, v, normalize(right));
-}
-
-[maxvertexcount(72)]
-void Geometry (point Attributes IN[1], inout TriangleStream<Varyings> OUT) {
-    float3 pos = IN[0].position.xyz;
-    float hs = _Size * 0.5f * saturate(IN[0].distance);
-    float3 right = rotate_vector(float3(1, 0, 0), IN[0].rotation) * hs;
-    float3 up = rotate_vector(float3(0, 1, 0), IN[0].rotation) * hs;
-    float3 forward = rotate_vector(float3(0, 0, 1), IN[0].rotation) * hs;
-
-    float extrusion = lerp(_Thickness, _Extrusion, IN[0].scale.x);
-    float thickness = min(_Thickness, _Extrusion) * IN[0].scale.y;
-
-    addCube(pos, right * thickness, up * thickness, forward * extrusion, OUT);
-    addCube(pos, right * extrusion, up * thickness, forward * thickness, OUT);
-    addCube(pos, right * thickness, up * extrusion, forward * thickness, OUT);
+    add_face(OUT, v, nright);
 };
 
 //

@@ -49,7 +49,7 @@ float3 RotationAxis(float2 uv)
     return float3(u2 * cs, u2 * sn, u);
 }
 
-float3 UpdatePosition(VParticle particle, uint2 id) 
+float3 UpdatePosition(VParticle particle, uint2 id)
 {
     float3 p = particle.position;
     float3 v = particle.velocity;
@@ -307,4 +307,3 @@ void FlowRandom (uint3 id : SV_DispatchThreadID)
     particle.flow = particle.flow || (nrand(id.xy, _Time.x) < _FlowRandomThrottle);
     _ParticleBuffer[id.x] = particle;
 }
-

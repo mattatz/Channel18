@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: ProceduralMidairGrid
+  m_Name: ProceduralMidairGridPoint
   m_Shader: {fileID: 4800000, guid: 0d08d083d30c15f4f9ee622cb77f00b2, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -60,7 +60,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _Distance: 23.4
     - _DstBlend: 0
-    - _Extrusion: 0.09999993
+    - _Extrusion: 0.04724413
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
@@ -72,7 +72,7 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Thickness: 0.01499999
+    - _Thickness: 0.6299206
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

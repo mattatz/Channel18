@@ -360,6 +360,18 @@ namespace VJ.Channel18
                 case "/midair/throttle":
                     throttle = Mathf.Max(0.1f, OSCUtils.GetFValue(data));
                     break;
+
+                case "/midair/init":
+                    Init();
+                    break;
+
+                case "/midair/rotate":
+                    Rotate();
+                    break;
+
+                case "/midair/scale":
+                    Scale();
+                    break;
             }
         }
 

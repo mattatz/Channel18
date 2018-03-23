@@ -27,7 +27,6 @@ namespace VJ.Channel18
     public enum VoxelMode
     {
         Default,
-        Randomize,
         Glitch,
         Clip
     };
@@ -51,9 +50,6 @@ namespace VJ.Channel18
                 voxelMode = value;
                 switch(voxelMode)
                 {
-                    case VoxelMode.Randomize:
-                        Randomize();
-                        break;
                     case VoxelMode.Glitch:
                         Glitch();
                         break;
@@ -108,7 +104,6 @@ namespace VJ.Channel18
 
         [SerializeField] protected bool flowRandom = false;
         [SerializeField] protected int flowRandomFreq = 100;
-        [SerializeField, Range(0f, 1f)] protected float flowRandomThrottle = 0.1f;
 
         #endregion
 
@@ -388,9 +383,9 @@ namespace VJ.Channel18
             VMode = VoxelMode.Clip;
         }
 
-        public void FlowRandom()
+        public void FlowRandom(float throttle = 0.1f)
         {
-            particleUpdate.SetFloat("_FlowRandomThrottle", flowRandomThrottle);
+            particleUpdate.SetFloat("_FlowRandomThrottle", throttle);
             ComputeParticle(flowRandomKer);
         }
 
@@ -399,7 +394,7 @@ namespace VJ.Channel18
             switch(note)
             {
                 case 33:
-                    FlowRandom();
+                    FlowRandom(1f);
                     break;
                 case 49:
                     break;
@@ -435,6 +430,13 @@ namespace VJ.Channel18
 
             switch(address)
             {
+                case "/voxel/visible":
+                    voxelVisible = OSCUtils.GetBoolFlag(data);
+                    Debug.Log(data.Count);
+                    Debug.Log(data[0]);
+                    Debug.Log(voxelVisible);
+                    break;
+
                 case "/voxel/particle/mode":
                     PMode = (ParticleMode)OSCUtils.GetIValue(data);
                     break;
@@ -444,12 +446,9 @@ namespace VJ.Channel18
                     break;
 
                 case "/voxel/flow":
-                    FlowRandom();
+                    FlowRandom(OSCUtils.GetFValue(data, 1));
                     break;
 
-                case "/voxel/flow/throttle":
-                    flowRandomThrottle = OSCUtils.GetFValue(data);
-                    break;
             }
         }
 

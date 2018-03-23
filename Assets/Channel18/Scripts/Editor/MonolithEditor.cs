@@ -15,13 +15,10 @@ namespace VJ.Channel18
             base.OnInspectorGUI();
 
             var mono = target as Monolith;
-            if(GUILayout.Button("Clip"))
-            {
-                mono.Clip();
-            } else if(GUILayout.Button("Randomize"))
-            {
-                mono.Randomize();
-            }
+            if(GUILayout.Button("Clip")) mono.Clip();
+            if (GUILayout.Button("BigOne")) mono.BigOne();
+            if (GUILayout.Button("Grid")) mono.Grid(Random.Range(0, 64));
+            if (GUILayout.Button("Randomize")) mono.Randomize();
 
         }
 

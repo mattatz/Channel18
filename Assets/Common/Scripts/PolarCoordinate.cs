@@ -6,6 +6,7 @@ using UnityEngine;
 public class PolarCoordinate {
 
     [SerializeField, Range(0f, 6.28f)] protected float theta0, theta1;
+    [SerializeField] protected float limit = 1.45f;
 
     public PolarCoordinate(float t0, float t1)
     {
@@ -35,10 +36,12 @@ public class PolarCoordinate {
 
     public Vector3 Cartesian(float radius, float offset = 0f)
     {
+        var t0 = theta0 + offset;
+        t0 = Mathf.Min(t0, limit);
         return new Vector3(
-            -radius * Mathf.Cos(theta0 + offset) * Mathf.Cos(theta1),
-             radius * Mathf.Sin(theta0 + offset),
-             radius * Mathf.Cos(theta0 + offset) * Mathf.Sin(theta1)
+            -radius * Mathf.Cos(t0) * Mathf.Cos(theta1),
+             radius * Mathf.Sin(t0),
+             radius * Mathf.Cos(t0) * Mathf.Sin(theta1)
         );
     }
 

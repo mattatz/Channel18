@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -21,7 +22,9 @@ namespace VJ.Channel18
         [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f;
         [SerializeField] protected float elevation = 100f, elevationMax = 300f;
         [SerializeField] protected float radius = 7.5f, thickness = 5f;
-        [SerializeField] protected GradientTextureGen gradGen;
+
+        [SerializeField] protected int gradient = 0;
+        [SerializeField] protected List<GradientTextureGen> gradGens;
 
         [SerializeField] protected Vector4 circle, line;
 
@@ -31,14 +34,13 @@ namespace VJ.Channel18
         protected const string kElevationKey = "_Elevation";
         protected const string kPlasticityKey = "_Plasticity";
         protected const string kRadiusKey = "_Radius";
-        protected const string kGradientKey = "_Gradient";
 
         #endregion
 
         protected Kernel updateKer;
         protected Dictionary<FloorMode, Kernel> kernels;
 
-        protected Texture2D gradTex;
+        protected List<Texture2D> gradients;
 
         protected override void Start () {
             base.Start();
@@ -46,7 +48,7 @@ namespace VJ.Channel18
             updateKer = new Kernel(compute, "Update");
             kernels = SetupFloorKernels();
 
-            gradTex = gradGen.Create(128, 1);
+            gradients = gradGens.Select(gen => gen.Create(128, 1)).ToList();
 
             var grids = new FloorGrid_t[instancesCount];
             var poffset = new Vector3(
@@ -96,7 +98,8 @@ namespace VJ.Channel18
         protected override void Compute(Kernel kernel, float dt = 0f)
         {
             compute.SetFloat(kElevationKey, elevation);
-            compute.SetTexture(kernel.Index, kGradientKey, gradTex);
+            int index = Mathf.Max(0, gradient) % gradients.Count;
+            compute.SetTexture(kernel.Index, "_Gradient", gradients[index]);
             base.Compute(kernel, dt);
         }
 
@@ -124,6 +127,8 @@ namespace VJ.Channel18
             compute.SetVector("_Line", line);
             Compute(kernels[mode], Time.deltaTime);
         }
+
+        #region Build
 
         protected override Mesh Build()
         {
@@ -278,15 +283,7 @@ namespace VJ.Channel18
             }
         }
 
-        public override void OnOSC(string address, List<object> data)
-        {
-            base.OnOSC(address, data);
-            switch(address)
-            {
-                case "/floor/color":
-                    break;
-            }
-        }
+        #endregion
 
         public void NoteOn(int note) {
             switch(note)
@@ -298,6 +295,7 @@ namespace VJ.Channel18
                     Apply(FloorMode.Circle);
                     break;
                 case 67:
+                    Apply(FloorMode.Line);
                     break;
             }
         }
@@ -312,11 +310,25 @@ namespace VJ.Channel18
                 case 3:
                     elevation = Mathf.Lerp(0f, elevationMax, value);
                     break;
-                case 35:
+                case 19:
+                    gradient = Mathf.FloorToInt(value * gradients.Count);
                     break;
-                case 51:
+            }
+        }
+
+        public override void OnOSC(string address, List<object> data)
+        {
+            base.OnOSC(address, data);
+            switch(address)
+            {
+                case "/floor/noise":
+                    Apply(FloorMode.Noise);
                     break;
-                case 67:
+                case "/floor/circle":
+                    Apply(FloorMode.Circle);
+                    break;
+                case "/floor/line":
+                    Apply(FloorMode.Line);
                     break;
             }
         }

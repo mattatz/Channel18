@@ -30,26 +30,33 @@ namespace VJ.Channel18
 
         public float Distance
         {
-            get { return distance + distanceNoiseGen.Value(Time.timeSinceLevelLoad, 0f); }
+            get { return distance; }
         }
 
         [SerializeField] List<CameraTargetLocation> locations;
         [SerializeField] protected int current;
-        [SerializeField] protected NoiseGen distanceNoiseGen;
         [SerializeField] protected float distance;
 
-        void Start () {
+        #region Monobehaviour functions
+
+        protected void Start () {
             current = Mathf.Clamp(current, 0, locations.Count - 1);
             var location = locations[current];
             transform.position = location.Position;
             distance = location.Distance;
         }
         
-        void Update () {
+        protected void Update () {
+            var dt = Time.deltaTime;
+            Apply(dt);
+        }
+
+        #endregion
+
+        protected void Apply(float dt)
+        {
             current = Mathf.Clamp(current, 0, locations.Count - 1);
             var location = locations[current];
-
-            var dt = Time.deltaTime;
             var p = Vector3.Lerp(transform.position, location.Position, dt);
             transform.position = p;
             distance = Mathf.Lerp(distance, location.Distance, dt);
@@ -72,6 +79,7 @@ namespace VJ.Channel18
             {
                 case "/camera/target/index":
                     current = OSCUtils.GetIValue(data, 0);
+                    Apply(OSCUtils.GetFValue(data, 1));
                     break;
             }
         }

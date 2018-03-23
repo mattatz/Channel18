@@ -12,9 +12,9 @@ namespace VJ.Channel18
         [SerializeField] new protected Camera camera;
         [SerializeField] protected PostProcessingProfile profile;
         [SerializeField] protected CameraTarget target;
+        [SerializeField] protected float floorHeight = 1f;
         [SerializeField] protected PolarCoordinate polar;
         [SerializeField] protected Vector3 offset;
-
         [SerializeField, Range(0f, 5f)] protected float speed = 1f;
         [SerializeField, Range(0f, 5f)] protected float speedMin = 0.1f, speedMax = 2f;
 
@@ -24,9 +24,13 @@ namespace VJ.Channel18
         [SerializeField, Range(0f, 1f)] protected float _angle = 0.5f;
         [SerializeField] protected float angleMin = -Mathf.PI * 0.25f, angleMax = Mathf.PI * 0.25f;
 
+        [SerializeField] protected NoiseGen distanceNoiseGen, angleNoiseGen;
+
         protected float distance, angle;
 
         [SerializeField] protected bool polarDirection;
+
+        #region Monobehaviour functions
 
         void Start () {
             distance = _distance;
@@ -43,10 +47,20 @@ namespace VJ.Channel18
             distance = Mathf.Lerp(distance, _distance, dt);
         }
 
+        void OnDrawGizmos ()
+        {
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireCube(new Vector3(0f, floorHeight, 0f), new Vector3(1000f, 1f, 1000f));
+        }
+
+        #endregion
+
         protected void Apply(float dt)
         {
-            var ct = polar.Cartesian(target.Distance + Mathf.Lerp(distanceMin, distanceMax, distance), Mathf.Lerp(angleMin, angleMax, angle));
+            var ang = Mathf.Lerp(angleMin, angleMax, angle) + angleNoiseGen.Value(0f, Time.timeSinceLevelLoad);
+            var ct = polar.Cartesian(target.Distance + distanceNoiseGen.Value(Time.timeSinceLevelLoad, 0f) + Mathf.Lerp(distanceMin, distanceMax, distance), ang);
             var to = ct + target.transform.position + offset;
+            to.y = Mathf.Max(to.y, floorHeight);
             camera.transform.position = Vector3.Lerp(camera.transform.position, to, dt);
             Look();
         }
