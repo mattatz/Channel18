@@ -9,7 +9,6 @@ Shader "VJ/Channel18/PostEffects/BlockNoise" {
 		_MainTex ("-", 2D) = "" {}
 		_T ("T", Range(0, 1)) = 1.0
 
-		_Intensity ("Intensity", Range(0, 1)) = 1.0
 		_Speed ("Speed", Range(0, 10)) = 1.0
 		_Shift ("Shift", Range(0, 0.25)) = 0.05
 		_ScaleS ("Scale S", Vector) = (24, 9, -1, -1)

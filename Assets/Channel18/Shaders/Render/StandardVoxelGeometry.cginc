@@ -12,7 +12,7 @@
 #define PASS_CUBE_SHADOWCASTER
 #endif
 
-half4 _Color;
+half4 _Color, _Emission;
 sampler2D _MainTex;
 float4 _MainTex_ST;
 
@@ -217,7 +217,8 @@ void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 out
 
     // Calculate ambient lighting and output to the emission buffer.
     half3 sh = ShadeSHPerPixel(data.normalWorld, input.ambient, input.wpos);
-    outEmission = half4(sh * c_diff, 1);
+    outEmission = _Emission + half4(sh * c_diff, 1);
+    // outEmission = _Emission;
 }
 
 #endif

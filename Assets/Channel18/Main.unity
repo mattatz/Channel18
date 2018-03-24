@@ -265,7 +265,7 @@ MonoBehaviour:
   animators:
   - {fileID: 95086880}
   - {fileID: 1684664427}
-  animationSpeedMin: 0.05
+  animationSpeedMin: 0.1
   animationSpeedMax: 1
   motion: 0
 --- !u!1 &100928077

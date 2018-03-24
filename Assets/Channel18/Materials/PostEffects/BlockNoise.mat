@@ -69,10 +69,10 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Shift: 0.246
+    - _Shift: 0.025
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _Speed: 1
+    - _Speed: 2.3
     - _SrcBlend: 1
     - _T: 1
     - _UVSec: 0

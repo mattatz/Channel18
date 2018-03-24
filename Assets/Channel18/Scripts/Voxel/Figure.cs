@@ -11,10 +11,11 @@ namespace VJ.Channel18
     public enum FigureMotion
     {
         Idle,
+        Touchscreen,
+        Bellydancing,
         Samba,
-        HipHop,
-        Silly,
-        Walking
+        Housedancing,
+        Silly
     };
 
     public class Figure : MonoBehaviour, INanoKontrollable {
