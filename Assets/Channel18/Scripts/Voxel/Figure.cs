@@ -67,7 +67,7 @@ namespace VJ.Channel18
                         }
                     });
                     break;
-                case 17:
+                case 18:
                     var index = Mathf.Clamp(Mathf.FloorToInt(motions.Length * knobValue), 0, motions.Length - 1);
                     Enum e = Enum.Parse(typeof(FigureMotion), motions.GetValue(index).ToString()) as Enum;
                     int x = Convert.ToInt32(e);

@@ -76,6 +76,8 @@ namespace VJ.Channel18
         [SerializeField] protected ParticleMode particleMode = ParticleMode.Immediate;
         [SerializeField] protected VoxelMode voxelMode = VoxelMode.Default;
         [SerializeField] protected bool voxelVisible = true;
+        [SerializeField] protected Color emission = Color.black;
+        protected Color _emission;
 
         protected Dictionary<ParticleMode, Kernel> particleKernels;
         protected Dictionary<VoxelMode, Kernel> voxelKernels;
@@ -165,6 +167,8 @@ namespace VJ.Channel18
             renderer = GetComponent<Renderer>();
             renderer.GetPropertyBlock(block);
 
+            _emission = emission;
+
             setupKer = new Kernel(particleUpdate, "Setup");
             flowRandomKer = new Kernel(particleUpdate, "FlowRandom");
             SetupParticleKernels();
@@ -193,6 +197,8 @@ namespace VJ.Channel18
 
             ComputeParticle(particleKernels[particleMode], dt);
             block.SetBuffer(kParticleBufferKey, particleBuffer);
+            _emission = Color.Lerp(_emission, emission, dt);
+            block.SetColor("_Emission", _emission);
             renderer.SetPropertyBlock(block);
         }
 
@@ -418,6 +424,10 @@ namespace VJ.Channel18
         {
             switch(knobNumber)
             {
+                case 17:
+                    emission = Color.Lerp(Color.black, Color.white, value);
+                    break;
+
                 case 1:
                     level = Mathf.FloorToInt(value * 4);
                     break;
