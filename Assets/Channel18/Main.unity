@@ -1193,6 +1193,7 @@ MonoBehaviour:
   audioAddress: /effect/audio
   reactive: 0
   material: {fileID: 2100000, guid: 5acf5cf1fcd07224db78e54f2423c2ef, type: 2}
+  t: 0
 --- !u!114 &759422195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1463,7 +1464,8 @@ MonoBehaviour:
   particleUpdate: {fileID: 7200000, guid: dc110c7af97e68747b98a25256389d0a, type: 3}
   particleMode: 1
   voxelMode: 0
-  voxelVisible: 1
+  voxelVisible: 0
+  emission: {r: 0, g: 0, b: 0, a: 1}
   speedScaleMin: 2
   speedScaleMax: 5
   speedLimit: 1

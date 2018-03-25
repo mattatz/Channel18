@@ -74,7 +74,7 @@ Material:
     - _SpecularHighlights: 1
     - _Speed: 2.3
     - _SrcBlend: 1
-    - _T: 1
+    - _T: 0
     - _UVSec: 0
     - _Up: 0
     - _Vertical: 0

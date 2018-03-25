@@ -37,6 +37,10 @@ namespace VJ.Channel18
             {
                 case "/posteffects/inverse":
                     break;
+
+                case "/posteffects/inverse/toggle":
+                    t = Mathf.Clamp01(1f - t);
+                    break;
             }
         }
 

@@ -8,7 +8,7 @@ using UnityEngine;
 namespace VJ.Channel18
 {
 
-    public class Mirror : PostEffectBase {
+    public class Mirror : PostEffectBase, INanoKontrollable {
 
         [SerializeField] protected bool horizontal, vertical;
         [SerializeField] protected bool left, up;
@@ -45,6 +45,29 @@ namespace VJ.Channel18
         }
 
         protected override void React(int index, bool on)
+        {
+        }
+
+        public void NoteOn(int note)
+        {
+            switch(note)
+            {
+                case 54:
+                    horizontal = !horizontal;
+                    Apply();
+                    break;
+                case 70:
+                    vertical = !vertical;
+                    Apply();
+                    break;
+            }
+        }
+
+        public void NoteOff(int note)
+        {
+        }
+
+        public void Knob(int knobNumber, float knobValue)
         {
         }
 
