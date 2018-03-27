@@ -314,6 +314,7 @@ MonoBehaviour:
   bounds:
     m_Center: {x: 0, y: 64, z: 0}
     m_Extent: {x: 64, y: 128, z: 64}
+  gradGen: {fileID: 11400000, guid: dd313887e3b7871409e599a49dd0a674, type: 2}
   throttle: 0
   sizeCurve:
     serializedVersion: 2
@@ -351,6 +352,7 @@ MonoBehaviour:
   buoyancy: {x: 0, y: 5.1, z: 0}
   noiseAmplitude: 2
   noiseFrequency: 0.01
+  rim: 0
   instancesCount: 2048
 --- !u!1 &152096826
 GameObject:
@@ -1638,7 +1640,7 @@ MonoBehaviour:
   offset: {x: 0, y: 0, z: 0}
   speed: 0.15
   speedMin: 0.05
-  speedMax: 0.85
+  speedMax: 0.6
   _distance: 0.5
   distanceMin: -20
   distanceMax: 50

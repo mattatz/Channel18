@@ -16,6 +16,7 @@ namespace VJ.Channel18
         [SerializeField] protected ComputeShader particleUpdate;
         [SerializeField] protected Material render;
         [SerializeField] protected Bounds bounds;
+        [SerializeField] protected GradientTextureGen gradGen;
         [SerializeField, Range(0f, 1f)] protected float throttle = 1.0f;
         [SerializeField] AnimationCurve sizeCurve;
         [SerializeField, Range(0f, 1f)] protected float decay = 0.5f;
@@ -23,6 +24,9 @@ namespace VJ.Channel18
         [SerializeField] protected Vector3 buoyancy = Vector3.up;
         [SerializeField] protected float noiseAmplitude = 1.0f;
         [SerializeField] protected float noiseFrequency = 0.01f;
+        [SerializeField, Range(0f, 1f)] protected float rim = 0f, mono = 0f;
+
+        protected float _rim, _mono;
 
         #region Shader property keys
 
@@ -45,6 +49,7 @@ namespace VJ.Channel18
 
         Kernel updateKer;
 
+
         protected void Start() {
             args[0] = quad.GetIndexCount(0);
             args[1] = (uint)instancesCount;
@@ -64,13 +69,22 @@ namespace VJ.Channel18
             }
             bubbleBuffer.SetData(bubbles);
 
+            render.SetTexture("_Gradient", gradGen.Create(128, 1));
             render.SetTexture("_SizeCurve", CreateCurve(sizeCurve));
             updateKer = new Kernel(particleUpdate, "Update");
+
+            _rim = rim;
+            _mono = mono;
         }
 
         protected void Update() {
-            Compute(updateKer, Time.timeSinceLevelLoad, Time.deltaTime);
+            var dt = Time.deltaTime;
+            Compute(updateKer, Time.timeSinceLevelLoad, dt);
 
+            _rim = Mathf.Lerp(_rim, rim, dt);
+            _mono = Mathf.Lerp(_mono, mono, dt);
+            render.SetFloat("_Rim", _rim);
+            render.SetFloat("_Mono", _mono);
             render.SetBuffer(kBubblesKey, bubbleBuffer);
             render.SetMatrix(kWorldToLocalKey, transform.worldToLocalMatrix);
             render.SetMatrix(kLocalToWorldKey, transform.localToWorldMatrix);
@@ -125,6 +139,19 @@ namespace VJ.Channel18
 
         public void NoteOn(int note)
         {
+            switch(note)
+            {
+                case 32:
+                    // toggle rim 
+                    rim = Mathf.Clamp01(1f - rim);
+                    break;
+                case 48:
+                    // toggle mono
+                    mono = Mathf.Clamp01(1f - mono);
+                    break;
+                case 64:
+                    break;
+            }
         }
 
         public void NoteOff(int note)

@@ -9,6 +9,10 @@
 
         _Displacement ("Displacement", Range(0.0, 500.0)) = 100.0
         _Curvature ("Curvature", Range(0.0, 5.0)) = 2.0
+
+		_Gradient ("Gradient", 2D) = "white" {}
+        [Toggle] _Rim ("Rim", Range(0.0, 1.0)) = 0.0
+        [Toggle] _Mono ("Mono", Range(0.0, 1.0)) = 0.0
 	}
 
 	SubShader
@@ -19,6 +23,8 @@
         }
 		LOD 100
         GrabPass {}
+		ZWrite On
+		ZTest LEqual
 
 		Pass
 		{
@@ -29,6 +35,7 @@
             #pragma instancing_options procedural:setup
 			
 			#include "UnityCG.cginc"
+            #include "../Common/Random.cginc"
             #include "../Common/Quaternion.cginc"
             #include "../Common/Matrix.cginc"
             #include "../Common/Bubble.cginc"
@@ -49,6 +56,7 @@
             };
 
             half4 _Color;
+			sampler2D _Gradient;
             float4x4 _LocalToWorld, _WorldToLocal;
 
             StructuredBuffer<Bubble> _Bubbles;
@@ -56,6 +64,7 @@
             sampler2D _SizeCurve;
 
             float _Displacement, _Curvature;
+			float _Rim, _Mono;
 
             sampler2D _GrabTexture;
             float4 _GrabTexture_ST;
@@ -98,7 +107,6 @@
 				return OUT;
 			}
 
-                                               
 			fixed4 frag (v2f IN) : SV_Target {
                 UNITY_SETUP_INSTANCE_ID(IN);
 
@@ -116,8 +124,17 @@
                 float2 uv = IN.screenPos.xy / IN.screenPos.w;
                 float f = pow(rim, _Curvature);
                 half4 grab = tex2D(_GrabTexture, uv + normal.xy * _Displacement * (_ScreenParams.zw - 1) * f);
-                // return lerp(grab, _Color, rim);
-                return grab;
+
+				float4 color = _Color;
+
+				#ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
+					uint iid = unity_InstanceID;
+					float u = nrand(float2(iid, 0));
+					color = color * tex2D(_Gradient, float2(u, 0));
+				#endif
+
+                // return grab;
+                return lerp(lerp(grab, color, rim * _Rim), color, _Mono);
             }
 
 			ENDCG

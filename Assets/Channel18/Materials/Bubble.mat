@@ -73,9 +73,11 @@ Material:
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
+    - _Mono: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _RefractionRatio: 0.488
+    - _Rim: 0.9999996
     - _Size: 3.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
