@@ -408,6 +408,7 @@ namespace VJ.Channel18
                     break;
 
                 case 34:
+                    voxelVisible = !voxelVisible;
                     break;
                 case 50:
                     break;

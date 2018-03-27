@@ -73,6 +73,22 @@ namespace VJ.Channel18
             });
         }
 
+        public void Increment ()
+        {
+            current = (current + 1) % locations.Count;
+        }
+
+        public void Decrement()
+        {
+            if(current - 1 < 0)
+            {
+                current = locations.Count - 1;
+            } else
+            {
+                current = (current - 1);
+            }
+        }
+
         public void OnOSC(string address, List<object> data)
         {
             switch(address)

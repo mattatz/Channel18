@@ -100,8 +100,10 @@ namespace VJ.Channel18
                     Randomize();
                     break;
                 case 55:
+                    target.Increment();
                     break;
                 case 71:
+                    target.Decrement();
                     break;
             }
         }
