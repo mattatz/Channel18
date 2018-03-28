@@ -14,30 +14,36 @@ namespace VJ.Channel18
     public class Lattice : AudioReactor, INanoKontrollable {
 
         [SerializeField, Range(1, 512)] protected int width = 128, height = 64, depth = 128;
-        [SerializeField, Range(0f, 0.2f)] protected float thickness = 0.025f;
+        [SerializeField, Range(0f, 1f)] protected float thickness = 0.25f, useLine = 1f;
 
         [SerializeField] protected Vector3 noiseScale = new Vector3(1f, 1f, 1f);
         [SerializeField] protected float baseNoiseSpeed = 1f, baseNoiseIntensity = 0.1f;
-        [SerializeField] protected float noiseSpeed = 1f, noiseIntensity = 0.1f;
+        [SerializeField, Range(0.0f, 2.0f)] protected float noiseSpeed = 1f;
+        [SerializeField, Range(0.0f, 0.25f)] protected float noiseIntensity = 0.1f;
         protected float noiseOffset = 0f;
 
-        [SerializeField] List<Material> latticeMaterials;
-        protected Material latticeMaterial;
+        [SerializeField] protected LatticeRenderer line, cuboid;
 
-        protected float _thickness, _noiseIntensity;
+        [SerializeField] List<Material> latticeMaterials;
+
+        protected float _useLine, _thickness, _noiseIntensity;
         protected Coroutine co;
 
         protected void Start () {
-            latticeMaterial = GetComponent<Renderer>().sharedMaterial;
-            GetComponent<MeshFilter>().sharedMesh = Build();
+            var mesh = Build();
+            line.Setup(mesh);
+            cuboid.Setup(mesh);
 
             _thickness = thickness;
+            _useLine = useLine;
             _noiseIntensity = noiseIntensity;
         }
 
         protected void Update()
         {
-            latticeMaterial.SetFloat("_Thickness", _thickness);
+            line.SetThickness(_thickness * _useLine);
+            cuboid.SetThickness(_thickness * (1f - _useLine));
+
             latticeMaterials.ForEach(m =>
             {
                 m.SetVector("_NoiseScale", noiseScale);
@@ -50,6 +56,7 @@ namespace VJ.Channel18
         {
             var dt = Time.fixedDeltaTime * 5f;
             _thickness = Mathf.Lerp(_thickness, thickness, dt);
+            _useLine  = Mathf.Lerp(_useLine, useLine, dt);
             _noiseIntensity = Mathf.Lerp(_noiseIntensity, noiseIntensity, dt);
             noiseOffset += dt * noiseSpeed;
         }
@@ -145,6 +152,9 @@ namespace VJ.Channel18
                 case "/lattice/wave":
                     Wave();
                     break;
+
+                case "/lattice/line":
+                    break;
             }
         }
 
@@ -174,7 +184,7 @@ namespace VJ.Channel18
                     noiseIntensity = Mathf.Lerp(0f, 0.5f, knobValue);
                     break;
                 case 21:
-                    thickness = Mathf.Lerp(0f, 0.1f, knobValue);
+                    thickness = Mathf.Clamp01(knobValue);
                     break;
             }
         }

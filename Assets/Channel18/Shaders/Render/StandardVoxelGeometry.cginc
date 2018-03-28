@@ -63,7 +63,8 @@ struct Varyings
 Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 {
     VParticle particle = _ParticleBuffer[vid];
-    input.position = float4(particle.position, 1);
+    // input.position = float4(particle.position, 1);
+    input.position = mul(unity_ObjectToWorld, float4(particle.position, 1));
     input.size = particle.scale;
     input.rotation = particle.rotation;
     return input;
@@ -73,28 +74,28 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 // Geometry stage
 //
 
-Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm, float2 texcoord)
+Varyings VertexOutput(in Varyings o, float4 wpos, float3 wnrm, float2 texcoord)
 {
-    float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
+    // float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
 
 #if defined(PASS_CUBE_SHADOWCASTER)
     // Cube map shadow caster pass: Transfer the shadow vector.
-    o.position = UnityObjectToClipPos(float4(wpos, 1));
-    o.shadow = wpos - _LightPositionRange.xyz;
+    o.position = UnityObjectToClipPos(float4(wpos.xyz, 1));
+    o.shadow = wpos.xyz - _LightPositionRange.xyz;
 
 #elif defined(UNITY_PASS_SHADOWCASTER)
     // Default shadow caster pass: Apply the shadow bias.
-    float scos = dot(wnrm, normalize(UnityWorldSpaceLightDir(wpos)));
-    wpos -= wnrm * unity_LightShadowBias.z * sqrt(1 - scos * scos);
-    o.position = UnityApplyLinearShadowBias(UnityWorldToClipPos(float4(wpos, 1)));
+    float scos = dot(wnrm, normalize(UnityWorldSpaceLightDir(wpos.xyz)));
+    wpos.xyz -= wnrm * unity_LightShadowBias.z * sqrt(1 - scos * scos);
+    o.position = UnityApplyLinearShadowBias(UnityWorldToClipPos(float4(wpos.xyz, 1)));
 
 #else
     // GBuffer construction pass
-    o.position = UnityWorldToClipPos(float4(wpos, 1));
+    o.position = UnityWorldToClipPos(float4(wpos.xyz, 1));
     o.normal = wnrm;
     o.texcoord = texcoord;
     o.ambient = ShadeSHPerVertex(wnrm, 0);
-    o.wpos = wpos;
+    o.wpos = wpos.xyz;
 #endif
 
     return o;

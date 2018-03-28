@@ -9,7 +9,9 @@ Shader"VJ/Channel18/Lattice/Cuboid"
         _Glossiness ("Smoothness", Range(0, 1)) = 0.5
         [Gamma] _Metallic("Metallic", Range(0, 1)) = 0
 
-        _Thickness ("Thickness", Range(0.0, 0.5)) = 0.1
+        _Thickness ("Thickness", Range(0.0, 1.0)) = 0.1
+		_Size ("Size", Range(0.0, 3.0)) = 1.0
+		
     }
 
     SubShader

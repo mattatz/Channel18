@@ -52,46 +52,48 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
     Grid grid = _Grids[vid];
 
     // input.position.xyz = grid.position.xyz;
-    input.position.xyz = lattice_position(grid.position.xyz);
+    // input.position.xyz = lattice_position(grid.position.xyz);
+	float3 local = lattice_position(grid.position.xyz);
+    input.position.xyz = mul(unity_ObjectToWorld, float4(local, 1)).xyz;
 
     input.rotation = grid.rotation;
     input.scale.xy = grid.scale.xy;
 
-    float3 vp = UnityObjectToViewPos(float4(grid.position.xyz, 1)).xyz;
+    float3 vp = UnityObjectToViewPos(float4(local, 1)).xyz;
     input.distance = length(vp) / _Distance;
 
     return input;
 }
 
-Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
+Varyings VertexOutput(in Varyings o, float4 wpos, float3 wnrm)
 {
-    float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
+    // float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
 
 #if defined(PASS_CUBE_SHADOWCASTER)
     // Cube map shadow caster pass: Transfer the shadow vector.
-    o.position = UnityWorldToClipPos(float4(wpos, 1));
-    o.shadow = wpos - _LightPositionRange.xyz;
+    o.position = UnityWorldToClipPos(float4(wpos.xyz, 1));
+    o.shadow = wpos.xyz - _LightPositionRange.xyz;
 
 #elif defined(UNITY_PASS_SHADOWCASTER)
     // Default shadow caster pass: Apply the shadow bias.
-    float scos = dot(wnrm, normalize(UnityWorldSpaceLightDir(wpos)));
-    wpos -= wnrm * unity_LightShadowBias.z * sqrt(1 - scos * scos);
-    o.position = UnityApplyLinearShadowBias(UnityWorldToClipPos(float4(wpos, 1)));
+    float scos = dot(wnrm, normalize(UnityWorldSpaceLightDir(wpos.xyz)));
+    wpos.xyz -= wnrm * unity_LightShadowBias.z * sqrt(1 - scos * scos);
+    o.position = UnityApplyLinearShadowBias(UnityWorldToClipPos(float4(wpos.xyz, 1)));
 
 #else
     // GBuffer construction pass
-    o.position = UnityWorldToClipPos(float4(wpos, 1));
+    o.position = UnityWorldToClipPos(float4(wpos.xyz, 1));
     o.normal = wnrm;
     o.ambient = ShadeSHPerVertex(wnrm, 0);
-    o.wpos = wpos;
+    o.wpos = wpos.xyz;
 #endif
 
     return o;
 }
 
-void addFace (inout TriangleStream<Varyings> OUT, float4 p[4], float3 normal)
+void addFace (inout TriangleStream<Varyings> OUT, float4 p[4], float3 wnrm)
 {
-    float3 wnrm = UnityObjectToWorldNormal(normal);
+    // float3 wnrm = UnityObjectToWorldNormal(normal);
     Varyings o = VertexOutput(o, p[0], wnrm);
     OUT.Append(o);
 

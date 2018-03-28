@@ -2,15 +2,20 @@ Shader"VJ/Channel18/Lattice/Line"
 {
 	Properties
 	{
-		_Color("Color", Color) = (1, 1, 1, 1)
+		_Color ("Color", Color) = (1, 1, 1, 1)
+		_Thickness ("Thickness", Range(0.0, 1.0)) = 1.0
 	}
 
 	SubShader
 	{
-		Tags { "RenderType" = "Opaque" }
+		Tags { 
+			"RenderType" = "Opaque" 
+			"Queue" = "Transparent"
+		}
 
 		Pass
 		{
+			Blend One One
 			ZWrite On
 
 			CGPROGRAM
@@ -22,6 +27,7 @@ Shader"VJ/Channel18/Lattice/Line"
 			#include "./Lattice.cginc"
 
 			float4 _Color;
+			fixed _Thickness;
 
 			struct v2f {
 				float4 position : POSITION;
@@ -36,7 +42,7 @@ Shader"VJ/Channel18/Lattice/Line"
 			}
 
 			float4 frag(v2f IN) : COLOR {
-				return _Color;
+				return _Color * saturate(_Thickness);
 			}
 
             ENDCG

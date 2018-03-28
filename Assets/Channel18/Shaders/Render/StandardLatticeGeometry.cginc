@@ -13,7 +13,7 @@ float4 _MainTex_ST;
 
 float _Glossiness;
 float _Metallic;
-float _Thickness;
+float _Thickness, _Size;
 
 #include "../Common/Quaternion.cginc"
 #include "../Common/Matrix.cginc"
@@ -40,37 +40,38 @@ struct Varyings
 
 Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 {
-    input.position.xyz = lattice_position(input.position.xyz);
+	float3 local = lattice_position(input.position.xyz);
+    input.position.xyz = mul(unity_ObjectToWorld, float4(local, 1)).xyz;
     return input;
 }
 
-Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm)
+Varyings VertexOutput(in Varyings o, float4 wpos, float3 wnrm)
 {
-    float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
+    // float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
 
 #if defined(PASS_CUBE_SHADOWCASTER)
     // Cube map shadow caster pass: Transfer the shadow vector.
-    o.position = UnityWorldToClipPos(float4(wpos, 1));
-    o.shadow = wpos - _LightPositionRange.xyz;
+    o.position = UnityWorldToClipPos(float4(wpos.xyz, 1));
+    o.shadow = wpos.xyz - _LightPositionRange.xyz;
 
 #elif defined(UNITY_PASS_SHADOWCASTER)
     // Default shadow caster pass: Apply the shadow bias.
-    float scos = dot(wnrm, normalize(UnityWorldSpaceLightDir(wpos)));
-    wpos -= wnrm * unity_LightShadowBias.z * sqrt(1 - scos * scos);
-    o.position = UnityApplyLinearShadowBias(UnityWorldToClipPos(float4(wpos, 1)));
+    float scos = dot(wnrm, normalize(UnityWorldSpaceLightDir(wpos.xyz)));
+    wpos.xyz -= wnrm * unity_LightShadowBias.z * sqrt(1 - scos * scos);
+    o.position = UnityApplyLinearShadowBias(UnityWorldToClipPos(float4(wpos.xyz, 1)));
 
 #else
     // GBuffer construction pass
-    o.position = UnityWorldToClipPos(float4(wpos, 1));
+    o.position = UnityWorldToClipPos(float4(wpos.xyz, 1));
     o.normal = wnrm;
     o.ambient = ShadeSHPerVertex(wnrm, 0);
-    o.wpos = wpos;
+    o.wpos = wpos.xyz;
 #endif
 
     return o;
 }
 
-void add_face(inout TriangleStream<Varyings> OUT, float4 p[4], float3 wnrm)
+void addFace(inout TriangleStream<Varyings> OUT, float4 p[4], float3 wnrm)
 {
     Varyings o = VertexOutput(o, p[0], wnrm);
     OUT.Append(o);
@@ -91,7 +92,8 @@ void add_face(inout TriangleStream<Varyings> OUT, float4 p[4], float3 wnrm)
 void Geometry (in line Attributes IN[2], inout TriangleStream<Varyings> OUT) {
     float3 pos = (IN[0].position.xyz + IN[1].position.xyz) * 0.5;
     float3 tangent = (IN[1].position.xyz - pos);
-    float3 forward = normalize(tangent) * (length(tangent) + _Thickness);
+	float thickness = _Thickness * _Size;
+    float3 forward = normalize(tangent) * (length(tangent) + thickness);
     float3 nforward = normalize(forward);
     float3 ntmp = cross(nforward, float3(1, 1, 1));
     float3 up = (cross(ntmp, nforward));
@@ -99,8 +101,8 @@ void Geometry (in line Attributes IN[2], inout TriangleStream<Varyings> OUT) {
     float3 right = (cross(nforward, nup));
     float3 nright = normalize(right);
 
-    up = nup * _Thickness;
-    right = nright * _Thickness;
+    up = nup * thickness;
+    right = nright * thickness;
 
     float4 v[4];
 
@@ -109,42 +111,42 @@ void Geometry (in line Attributes IN[2], inout TriangleStream<Varyings> OUT) {
     v[1] = float4(pos + forward + right + up, 1.0f);
     v[2] = float4(pos + forward - right - up, 1.0f);
     v[3] = float4(pos + forward - right + up, 1.0f);
-    add_face(OUT, v, nforward);
+    addFace(OUT, v, nforward);
 
     // back
     v[0] = float4(pos - forward - right - up, 1.0f);
     v[1] = float4(pos - forward - right + up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos - forward + right + up, 1.0f);
-    add_face(OUT, v, -nforward);
+    addFace(OUT, v, -nforward);
 
     // up
     v[0] = float4(pos - forward + right + up, 1.0f);
     v[1] = float4(pos - forward - right + up, 1.0f);
     v[2] = float4(pos + forward + right + up, 1.0f);
     v[3] = float4(pos + forward - right + up, 1.0f);
-    add_face(OUT, v, nup);
+    addFace(OUT, v, nup);
 
     // down
     v[0] = float4(pos + forward + right - up, 1.0f);
     v[1] = float4(pos + forward - right - up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos - forward - right - up, 1.0f);
-    add_face(OUT, v, -nup);
+    addFace(OUT, v, -nup);
 
     // left
     v[0] = float4(pos + forward - right - up, 1.0f);
     v[1] = float4(pos + forward - right + up, 1.0f);
     v[2] = float4(pos - forward - right - up, 1.0f);
     v[3] = float4(pos - forward - right + up, 1.0f);
-    add_face(OUT, v, -nright);
+    addFace(OUT, v, -nright);
 
     // right
     v[0] = float4(pos - forward + right + up, 1.0f);
     v[1] = float4(pos + forward + right + up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos + forward + right - up, 1.0f);
-    add_face(OUT, v, nright);
+    addFace(OUT, v, nright);
 };
 
 //

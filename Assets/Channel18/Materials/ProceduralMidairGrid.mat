@@ -60,7 +60,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _Distance: 23.4
     - _DstBlend: 0
-    - _Extrusion: 0.09999995
+    - _Extrusion: 0.099999905
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
@@ -68,11 +68,11 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Size: 1
+    - _Size: 16
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Thickness: 0.014999993
+    - _Thickness: 0.014999988
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

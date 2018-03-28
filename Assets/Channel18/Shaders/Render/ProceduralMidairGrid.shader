@@ -10,7 +10,7 @@ Shader"VJ/Channel18/MidairGrid"
         [Gamma] _Metallic("Metallic", Range(0, 1)) = 0
 
         [Space]
-        _Size ("Size", Range(0.0, 1.0)) = 0.5
+        _Size ("Size", Range(0.0, 30.0)) = 0.5
         _Distance ("Distance", Range(0.0, 100.0)) = 50.0
         _Extrusion ("Extrusion", Range(0.0, 1.0)) = 0.25
         _Thickness ("Thickness", Range(0.0, 1.0)) = 0.01
