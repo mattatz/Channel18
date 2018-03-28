@@ -58,7 +58,7 @@ namespace VJ.Channel18
         {
             var dt = Time.fixedDeltaTime;
             _thickness = Mathf.Lerp(_thickness, thickness, dt * 3f);
-            _useLine  = Mathf.Lerp(_useLine, useLine, dt);
+            _useLine  = Mathf.Lerp(_useLine, useLine, dt * 5f);
             _noiseIntensity = Mathf.Lerp(_noiseIntensity, noiseIntensity, Mathf.Clamp01(dt * 50f));
             noiseOffset += dt * noiseSpeed;
         }
@@ -179,6 +179,10 @@ namespace VJ.Channel18
             {
                 case "/lattice/wave":
                     Wave();
+                    break;
+
+                case "/lattice/line":
+                    useLine = OSCUtils.GetIValue(data, 0);
                     break;
 
                 case "/lattice/line/toggle":

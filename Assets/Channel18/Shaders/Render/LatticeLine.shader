@@ -42,7 +42,9 @@ Shader"VJ/Channel18/Lattice/Line"
 			}
 
 			float4 frag(v2f IN) : COLOR {
-				return _Color * saturate(_Thickness);
+				float alpha = saturate(_Thickness);
+				clip(alpha - 0.01);
+				return _Color * alpha;
 			}
 
             ENDCG

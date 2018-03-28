@@ -24,6 +24,7 @@
 		LOD 100
         GrabPass {}
 		ZWrite On
+		Blend Off
 		ZTest LEqual
 
 		Pass

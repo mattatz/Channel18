@@ -13,10 +13,6 @@ namespace VJ.Channel18
 
     public class ProceduralMidairGrid : ProceduralGrid, INanoKontrollable {
 
-        protected enum MidairMode
-        {
-        };
-
         [SerializeField, Range(0.1f, 1f)] protected float duration = 0.5f;
         [SerializeField, Range(0f, 1f)] protected float extrusion = 0.05f, thickness = 0.001f;
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.5f;
@@ -402,7 +398,7 @@ namespace VJ.Channel18
             switch(knobNumber)
             {
                 case 4:
-                    thickness = knobValue;
+                    thickness = Mathf.Lerp(0f, 0.5f, knobValue);
                     break;
 
                 case 20:

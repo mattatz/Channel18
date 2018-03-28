@@ -62,6 +62,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _GradientHeight: 10
     - _Metallic: 0.115
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -69,6 +70,8 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _T: 1
+    - _Thickness: 0.00006149702
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

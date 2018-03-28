@@ -18,29 +18,23 @@ namespace VJ.Channel18
 
     public class ProceduralFloorGrid : ProceduralGrid, INanoKontrollable {
 
+        [SerializeField, Range(0f, 1f)] protected float thickness = 1f;
         [SerializeField, Range(0f, 100f)] protected float plasticity = 10f;
         [SerializeField] protected float noiseSpeed = 1f, noiseScale = 0.5f;
-        [SerializeField] protected float elevation = 100f, elevationMax = 300f;
-        [SerializeField] protected float radius = 7.5f, thickness = 5f;
+        [SerializeField] protected float elevation = 100f, elevationMin = 100f, elevationMax = 300f;
+        [SerializeField] protected float radius = 7.5f, distance = 10f;
 
         [SerializeField] protected int gradient = 0;
         [SerializeField] protected List<GradientTextureGen> gradGens;
 
         [SerializeField] protected Vector4 circle, line;
 
-        #region Shader property keys
-
-        protected const string kNoiseParamsKey = "_NoiseParams";
-        protected const string kElevationKey = "_Elevation";
-        protected const string kPlasticityKey = "_Plasticity";
-        protected const string kRadiusKey = "_Radius";
-
-        #endregion
-
         protected Kernel updateKer;
         protected Dictionary<FloorMode, Kernel> kernels;
 
         protected List<Texture2D> gradients;
+
+        protected float _thickness;
 
         protected override void Start () {
             base.Start();
@@ -49,6 +43,7 @@ namespace VJ.Channel18
             kernels = SetupFloorKernels();
 
             gradients = gradGens.Select(gen => gen.Create(128, 1)).ToList();
+            _thickness = thickness;
 
             var grids = new FloorGrid_t[instancesCount];
             var poffset = new Vector3(
@@ -90,14 +85,17 @@ namespace VJ.Channel18
         {
             // if(Time.frameCount % 4 == 0) Apply(FloorMode.Line);
 
-            compute.SetFloat(kPlasticityKey, plasticity);
+            compute.SetFloat("_Plasticity", plasticity);
             Compute(updateKer, Time.deltaTime);
+
+            _thickness = Mathf.Lerp(_thickness, thickness, Time.deltaTime * 3f);
+            render.SetFloat("_Thickness", _thickness);
             Render();
         }
 
         protected override void Compute(Kernel kernel, float dt = 0f)
         {
-            compute.SetFloat(kElevationKey, elevation);
+            compute.SetFloat("_Elevation", elevation);
             int index = Mathf.Max(0, gradient) % gradients.Count;
             compute.SetTexture(kernel.Index, "_Gradient", gradients[index]);
             base.Compute(kernel, dt);
@@ -108,8 +106,8 @@ namespace VJ.Channel18
             switch(mode)
             {
                 case FloorMode.Noise:
-                    compute.SetVector(kNoiseParamsKey, new Vector3(noiseSpeed, noiseScale, 1f));
-                    compute.SetVector(kRadiusKey, new Vector2(radius, radius + thickness));
+                    compute.SetVector("_NoiseParams", new Vector3(noiseSpeed, noiseScale, 1f));
+                    compute.SetVector("_Radius", new Vector2(radius, radius + distance));
                     break;
                 case FloorMode.Circle:
                     break;
@@ -308,7 +306,7 @@ namespace VJ.Channel18
             switch(knobNumber)
             {
                 case 3:
-                    elevation = Mathf.Lerp(0f, elevationMax, value);
+                    elevation = Mathf.Lerp(elevationMin, elevationMax, value);
                     break;
                 case 19:
                     gradient = Mathf.FloorToInt(value * gradients.Count);
@@ -321,6 +319,10 @@ namespace VJ.Channel18
             base.OnOSC(address, data);
             switch(address)
             {
+                case "/floor/thickness":
+                    thickness = OSCUtils.GetFValue(data, 0);
+                    break;
+
                 case "/floor/noise":
                     Apply(FloorMode.Noise);
                     break;
