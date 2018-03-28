@@ -63,8 +63,7 @@ struct Varyings
 Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 {
     VParticle particle = _ParticleBuffer[vid];
-    // input.position = float4(particle.position, 1);
-    input.position = mul(unity_ObjectToWorld, float4(particle.position, 1));
+    input.position = float4(particle.position, 1);
     input.size = particle.scale;
     input.rotation = particle.rotation;
     return input;
@@ -74,9 +73,9 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 // Geometry stage
 //
 
-Varyings VertexOutput(in Varyings o, float4 wpos, float3 wnrm, float2 texcoord)
+Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm, float2 texcoord)
 {
-    // float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
+    float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
 
 #if defined(PASS_CUBE_SHADOWCASTER)
     // Cube map shadow caster pass: Transfer the shadow vector.

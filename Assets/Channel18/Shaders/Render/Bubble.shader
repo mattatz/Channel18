@@ -19,7 +19,7 @@
 	{
 		Tags { 
             "RenderType"="Opaque" 
-            "Queue"="Transparent" 
+            "Queue"="Transparent+1" 
         }
 		LOD 100
         GrabPass {}

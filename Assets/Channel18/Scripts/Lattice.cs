@@ -25,9 +25,11 @@ namespace VJ.Channel18
         [SerializeField] protected LatticeRenderer line, cuboid;
 
         [SerializeField] List<Material> latticeMaterials;
+        [SerializeField] List<Vector3> scales;
+        [SerializeField] protected int iscale = 0;
 
         protected float _useLine, _thickness, _noiseIntensity;
-        protected Coroutine co;
+        protected Coroutine waver, scaler;
 
         protected void Start () {
             var mesh = Build();
@@ -54,10 +56,10 @@ namespace VJ.Channel18
 
         protected void FixedUpdate()
         {
-            var dt = Time.fixedDeltaTime * 5f;
-            _thickness = Mathf.Lerp(_thickness, thickness, dt);
+            var dt = Time.fixedDeltaTime;
+            _thickness = Mathf.Lerp(_thickness, thickness, dt * 3f);
             _useLine  = Mathf.Lerp(_useLine, useLine, dt);
-            _noiseIntensity = Mathf.Lerp(_noiseIntensity, noiseIntensity, dt);
+            _noiseIntensity = Mathf.Lerp(_noiseIntensity, noiseIntensity, Mathf.Clamp01(dt * 50f));
             noiseOffset += dt * noiseSpeed;
         }
 
@@ -125,18 +127,44 @@ namespace VJ.Channel18
 
         protected void Wave(float duration = 0.45f)
         {
-            if(co != null) {
-                StopCoroutine(co);
+            if(waver != null) {
+                StopCoroutine(waver);
             }
 
             float duration0 = duration * 0.5f;
             float duration1 = duration * 0.5f;
             float speedMin = baseNoiseSpeed, speedMax = baseNoiseSpeed * 5f;
-            float intensityMin = baseNoiseIntensity, intensityMax = baseNoiseIntensity * 1.1f;
-            co = StartCoroutine(Easing.Ease(duration0, Easing.Exponential.Out, duration1, Easing.Linear, (float t) => {
+            float intensityMin = baseNoiseIntensity, intensityMax = baseNoiseIntensity * 1.25f;
+            waver = StartCoroutine(Easing.Ease(duration0, Easing.Exponential.Out, duration1, Easing.Linear, (float t) => {
                 noiseSpeed = Mathf.Lerp(speedMin, speedMax, t);
                 _noiseIntensity = noiseIntensity = Mathf.Lerp(intensityMin, intensityMax, t);
             }, 0f, 1f));
+        }
+
+        protected void Scale(int index = -1, float duration = 1.0f)
+        {
+            if(scaler != null) {
+                StopCoroutine(scaler);
+                scaler = null;
+            }
+            scaler = StartCoroutine(IScale(scales[index < 0 ? Random.Range(0, scales.Count) : (index % scales.Count)], duration));
+        }
+
+        protected IEnumerator IScale(Vector3 to, float duration)
+        {
+            yield return 0;
+
+            var from = transform.localScale;
+            var time = 0f;
+            while(time < duration)
+            {
+                yield return 0;
+                time += Time.deltaTime;
+                var t = time / duration;
+                var et = Easing.Quadratic.Out(t);
+                transform.localScale = Vector3.Lerp(from, to, et);
+            }
+            transform.localScale = to;
         }
 
         protected override void React(int index, bool on)
@@ -153,7 +181,8 @@ namespace VJ.Channel18
                     Wave();
                     break;
 
-                case "/lattice/line":
+                case "/lattice/line/toggle":
+                    useLine = Mathf.Clamp01(1f - useLine);
                     break;
             }
         }
@@ -163,11 +192,13 @@ namespace VJ.Channel18
             switch(note)
             {
                 case 37:
-                    Wave();
+                    useLine = Mathf.Clamp01(1f - useLine);
                     break;
                 case 53:
+                    Wave();
                     break;
                 case 69:
+                    Scale((++iscale));
                     break;
             }
         }
@@ -181,7 +212,7 @@ namespace VJ.Channel18
             switch(knobNumber)
             {
                 case 5:
-                    noiseIntensity = Mathf.Lerp(0f, 0.5f, knobValue);
+                    noiseIntensity = Mathf.Lerp(0f, baseNoiseIntensity, knobValue);
                     break;
                 case 21:
                     thickness = Mathf.Clamp01(knobValue);

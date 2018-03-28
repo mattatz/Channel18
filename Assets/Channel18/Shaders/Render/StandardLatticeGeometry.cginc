@@ -95,7 +95,10 @@ void Geometry (in line Attributes IN[2], inout TriangleStream<Varyings> OUT) {
 	float thickness = _Thickness * _Size;
     float3 forward = normalize(tangent) * (length(tangent) + thickness);
     float3 nforward = normalize(forward);
-    float3 ntmp = cross(nforward, float3(1, 1, 1));
+
+	float d = abs(dot(nforward, float3(0, 1, 0)));
+    float3 ntmp = cross(nforward, lerp(float3(0, 1, 0), float3(1, 0, 0), step(0.999, d)));
+    // float3 ntmp = cross(nforward, float3(0, 1, 0));
     float3 up = (cross(ntmp, nforward));
     float3 nup = normalize(up);
     float3 right = (cross(nforward, nup));

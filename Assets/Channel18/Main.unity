@@ -504,8 +504,8 @@ MonoBehaviour:
   thickness: 0
   useLine: 1
   noiseScale: {x: 1, y: 1, z: 1}
-  baseNoiseSpeed: 0.2
-  baseNoiseIntensity: 0.05
+  baseNoiseSpeed: 0.75
+  baseNoiseIntensity: 0.075
   noiseSpeed: 0.2
   noiseIntensity: 0
   line: {fileID: 951103512}
@@ -514,6 +514,12 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 0825681635fbde940a7752d79176b0fb, type: 2}
   - {fileID: 2100000, guid: ec87ffbb06244794c9250e3e6c0abb4d, type: 2}
   - {fileID: 2100000, guid: 65cfc88567ed5c94dadddb4b5a1bb969, type: 2}
+  scales:
+  - {x: 16, y: 16, z: 16}
+  - {x: 128, y: 16, z: 16}
+  - {x: 8, y: 16, z: 8}
+  - {x: 1, y: 16, z: 1}
+  iscale: 0
 --- !u!1001 &297717152
 Prefab:
   m_ObjectHideFlags: 0
