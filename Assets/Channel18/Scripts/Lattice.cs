@@ -188,6 +188,11 @@ namespace VJ.Channel18
                 case "/lattice/line/toggle":
                     useLine = Mathf.Clamp01(1f - useLine);
                     break;
+
+                case "/lattice/scale":
+                    iscale = OSCUtils.GetIValue(data, 0);
+                    Scale(iscale);
+                    break;
             }
         }
 
