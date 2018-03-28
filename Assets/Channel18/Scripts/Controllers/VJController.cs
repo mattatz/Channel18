@@ -43,6 +43,11 @@ namespace VJ.Channel18
         #endregion
 
         void Start () {
+
+#if UNITY_STANDALONE
+            Cursor.visible = false;
+#endif
+
             server = CreateServer("Channel18", port);
             packets = new List<OSCPacket>();
 
