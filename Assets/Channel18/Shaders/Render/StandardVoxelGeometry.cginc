@@ -1,6 +1,3 @@
-// - Sources:
-//      Standard geometry shader example
-//      https://github.com/keijiro/StandardGeometryShader
 
 #include "UnityCG.cginc"
 #include "UnityGBuffer.cginc"
@@ -21,6 +18,7 @@ half _Metallic;
 
 float _Size;
 
+#include "../Common/Random.cginc"
 #include "../Common/Quaternion.cginc"
 #include "../Common/VoxelParticle.cginc"
 
@@ -32,6 +30,7 @@ struct Attributes
     float4 position : POSITION;
     float4 rotation : TANGENT;
     float3 size : NORMAL;
+	float3 color : COLOR;
 };
 
 // Fragment varyings
@@ -49,10 +48,9 @@ struct Varyings
 #else
     // GBuffer construction pass
     float3 normal : NORMAL;
-    float2 texcoord : TEXCOORD0;
-    half3 ambient : TEXCOORD1;
-    float3 wpos : TEXCOORD2;
-
+    half3 ambient : TEXCOORD0;
+    float3 wpos : TEXCOORD1;
+	float3 color : COLOR;
 #endif
 };
 
@@ -66,6 +64,7 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
     input.position = float4(particle.position, 1);
     input.size = particle.scale;
     input.rotation = particle.rotation;
+	input.color.rgb = particle.color.rgb;
     return input;
 }
 
@@ -73,7 +72,7 @@ Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 // Geometry stage
 //
 
-Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm, float2 texcoord)
+Varyings VertexOutput(in Attributes IN, in Varyings o, float4 pos, float3 wnrm)
 {
     float3 wpos = mul(unity_ObjectToWorld, pos).xyz;
 
@@ -92,27 +91,29 @@ Varyings VertexOutput(in Varyings o, float4 pos, float3 wnrm, float2 texcoord)
     // GBuffer construction pass
     o.position = UnityWorldToClipPos(float4(wpos.xyz, 1));
     o.normal = wnrm;
-    o.texcoord = texcoord;
     o.ambient = ShadeSHPerVertex(wnrm, 0);
     o.wpos = wpos.xyz;
+	o.color = IN.color;
 #endif
 
     return o;
 }
 
-void addFace (inout TriangleStream<Varyings> OUT, float4 p[4], float3 normal)
+void addFace (in Attributes IN, inout TriangleStream<Varyings> OUT, float4 p[4], float3 normal)
 {
     float3 wnrm = UnityObjectToWorldNormal(normal);
-    Varyings o = VertexOutput(o, p[0], wnrm, float2(1.0f, 0.0f));
+    Varyings o;
+	UNITY_INITIALIZE_OUTPUT(Varyings, o);
+    o = VertexOutput(IN, o, p[0], wnrm);
     OUT.Append(o);
 
-    o = VertexOutput(o, p[1], wnrm, float2(1.0f, 1.0f));
+    o = VertexOutput(IN, o, p[1], wnrm);
     OUT.Append(o);
 
-    o = VertexOutput(o, p[2], wnrm, float2(0.0f, 0.0f));
+    o = VertexOutput(IN, o, p[2], wnrm);
     OUT.Append(o);
 
-    o = VertexOutput(o, p[3], wnrm, float2(0.0f, 1.0f));
+    o = VertexOutput(IN, o, p[3], wnrm);
     OUT.Append(o);
 
     OUT.RestartStrip();
@@ -135,42 +136,42 @@ void Geometry (point Attributes IN[1], inout TriangleStream<Varyings> OUT) {
     v[1] = float4(pos + forward + right + up, 1.0f);
     v[2] = float4(pos + forward - right - up, 1.0f);
     v[3] = float4(pos + forward - right + up, 1.0f);
-    addFace(OUT, v, normalize(forward));
+    addFace(IN[0], OUT, v, normalize(forward));
 
 	// back
     v[0] = float4(pos - forward - right - up, 1.0f);
     v[1] = float4(pos - forward - right + up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos - forward + right + up, 1.0f);
-    addFace(OUT, v, -normalize(forward));
+    addFace(IN[0], OUT, v, -normalize(forward));
 
 	// up
     v[0] = float4(pos - forward + right + up, 1.0f);
     v[1] = float4(pos - forward - right + up, 1.0f);
     v[2] = float4(pos + forward + right + up, 1.0f);
     v[3] = float4(pos + forward - right + up, 1.0f);
-    addFace(OUT, v, normalize(up));
+    addFace(IN[0], OUT, v, normalize(up));
 
 	// down
     v[0] = float4(pos + forward + right - up, 1.0f);
     v[1] = float4(pos + forward - right - up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos - forward - right - up, 1.0f);
-    addFace(OUT, v, -normalize(up));
+    addFace(IN[0], OUT, v, -normalize(up));
 
 	// left
     v[0] = float4(pos + forward - right - up, 1.0f);
     v[1] = float4(pos + forward - right + up, 1.0f);
     v[2] = float4(pos - forward - right - up, 1.0f);
     v[3] = float4(pos - forward - right + up, 1.0f);
-    addFace(OUT, v, -normalize(right));
+    addFace(IN[0], OUT, v, -normalize(right));
 
 	// right
     v[0] = float4(pos - forward + right + up, 1.0f);
     v[1] = float4(pos + forward + right + up, 1.0f);
     v[2] = float4(pos - forward + right - up, 1.0f);
     v[3] = float4(pos + forward + right - up, 1.0f);
-    addFace(OUT, v, normalize(right));
+    addFace(IN[0], OUT, v, normalize(right));
 };
 
 //
@@ -196,7 +197,8 @@ half4 Fragment() : SV_Target { return 0; }
 // GBuffer construction pass
 void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 outGBuffer1 : SV_Target1, out half4 outGBuffer2 : SV_Target2, out half4 outEmission : SV_Target3) {
     // Sample textures
-    half3 albedo = tex2D(_MainTex, input.texcoord).rgb * _Color.rgb;
+    // half3 albedo = input.color.rgb * _Color.rgb;
+    half3 albedo = _Color.rgb;
 
     // PBS workflow conversion (metallic -> specular)
     half3 c_diff, c_spec;
@@ -217,7 +219,7 @@ void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 out
 
     // Calculate ambient lighting and output to the emission buffer.
     half3 sh = ShadeSHPerPixel(data.normalWorld, input.ambient, input.wpos);
-    outEmission = _Emission + half4(sh * c_diff, 1);
+    outEmission = (float4(input.color.rgb, 1) * _Emission) + half4(sh * c_diff, 1);
     // outEmission = _Emission;
 }
 

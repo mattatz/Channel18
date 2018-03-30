@@ -77,10 +77,14 @@ namespace VJ.Channel18
         [SerializeField] protected VoxelMode voxelMode = VoxelMode.Default;
         [SerializeField] protected bool voxelVisible = true;
         [SerializeField] protected Color emission = Color.black;
+        [SerializeField] protected GradientTextureGen gradGen;
+        [SerializeField, Range(0.01f, 30f)] protected float gradientScale = 5f, gradientSpeed = 0.1f;
+        [SerializeField] protected bool useColor;
         protected Color _emission;
 
         protected Dictionary<ParticleMode, Kernel> particleKernels;
         protected Dictionary<VoxelMode, Kernel> voxelKernels;
+        protected Kernel gradKer;
 
         #region Particle properties
 
@@ -174,6 +178,9 @@ namespace VJ.Channel18
             SetupParticleKernels();
             SetupVoxelKernels();
 
+            gradKer = new Kernel(particleUpdate, "Gradient");
+            particleUpdate.SetTexture(gradKer.Index, "_Gradient", gradGen.Create(128, 1));
+
             Setup();
         }
      
@@ -196,6 +203,12 @@ namespace VJ.Channel18
             }
 
             ComputeParticle(particleKernels[particleMode], dt);
+
+            particleUpdate.SetFloat("_UseColor", useColor ? 1f : 0f);
+            particleUpdate.SetFloat("_GradientScale", gradientScale);
+            particleUpdate.SetFloat("_GradientSpeed", gradientSpeed);
+            ComputeParticle(gradKer, dt);
+
             block.SetBuffer(kParticleBufferKey, particleBuffer);
             _emission = Color.Lerp(_emission, emission, dt);
             block.SetColor("_Emission", _emission);

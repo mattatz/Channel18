@@ -118,7 +118,7 @@ namespace VJ.Channel18
             {
                 case 7:
                     // update distance
-                    _distance = knobValue;
+                    _distance = Mathf.Clamp01(1f - knobValue);
                     break;
 
                 case 23:

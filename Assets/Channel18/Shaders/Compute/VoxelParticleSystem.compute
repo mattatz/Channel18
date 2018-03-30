@@ -6,6 +6,8 @@
 #pragma kernel Flow
 #pragma kernel FlowRandom
 
+#pragma kernel Gradient
+
 #define THREAD [numthreads(8, 1, 1)]
 #define DISCARD_OVERFLOW if (id.x >= _ParticleCount) return;
 
@@ -38,6 +40,11 @@ float3 _NoiseOffset;
 
 half _DelaySpeed, _TransformSpeed, _ClipSpeed, _FlowSpeed;
 half _FlowRandomThrottle;
+
+Texture2D<float4> _Gradient;
+SamplerState _LinearRepeat;
+float _GradientScale, _GradientSpeed;
+float _UseColor;
 
 float3 RotationAxis(float2 uv)
 {
@@ -137,27 +144,6 @@ Voxel GetVoxel(uint i) {
     return v;
 }
 
-/*
-bool DownSample(uint id, uint level, out uint index)
-{
-    uint3 p = GetPosition(id);
-    uint w = _Width >> level;
-    uint h = _Height >> level;
-    uint d = _Depth >> level;
-    uint x = p.x >> level;
-    uint y = p.y >> level;
-    uint z = p.z >> level;
-
-    index = GetIndex(uint3(x, y, z), w, h, d);
-
-    uint div = uint(pow(2, level));
-    uint rx = p.x % div;
-    uint ry = p.y % div;
-    uint rz = p.z % div;
-    return (rx == 0 && ry == 0 && rz == 0) && (x < w && y < h && z < d);
-}
-*/
-
 THREAD
 void Setup (uint3 id : SV_DispatchThreadID)
 {
@@ -170,6 +156,7 @@ void Setup (uint3 id : SV_DispatchThreadID)
     particle.rotation = QUATERNION_IDENTITY;
     particle.scale = float3(_UnitLength, _UnitLength, _UnitLength);
     particle.velocity = float3(0, 0, 0);
+	particle.color = float4(1, 1, 1, 1);
     particle.speed = lerp(_Speed.x, _Speed.y, nrand(id.xy));
     particle.lifetime = 1.0;
     particle.flow = false;
@@ -307,3 +294,22 @@ void FlowRandom (uint3 id : SV_DispatchThreadID)
     particle.flow = particle.flow || (nrand(id.xy, _Time.x) < _FlowRandomThrottle);
     _ParticleBuffer[id.x] = particle;
 }
+
+THREAD
+void Gradient (uint3 id : SV_DispatchThreadID)
+{
+    DISCARD_OVERFLOW
+
+    VParticle particle = _ParticleBuffer[id.x];
+
+	float nx = snoise_grad(particle.position.xyz * _GradientScale + float3(0, _Time.x * _GradientSpeed, 0)).x;
+	float3 grad = _Gradient.SampleLevel(_LinearRepeat, float2(nx, 0.5), 0).rgb;
+
+	// float3 grad = _Gradient.SampleLevel(_LinearRepeat, float2(nrand(id.xy), 0.5), 0).rgb;
+
+	float3 color = lerp(float3(1, 1, 1), grad, _UseColor);
+	float dt = _DT.x * 5.0;
+	particle.color.rgb = lerp(particle.color.rgb, color, saturate(dt));
+    _ParticleBuffer[id.x] = particle;
+}
+

@@ -70,9 +70,9 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Thickness: 0.008661423
+    - _Thickness: 0.37
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.28968424, g: 0.3455882, b: 0.3409617, a: 1}
+    - _Color: {r: 0.5735294, g: 0.5735294, b: 0.5735294, a: 0.409}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

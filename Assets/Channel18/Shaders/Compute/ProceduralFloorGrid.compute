@@ -118,7 +118,7 @@ void Line (uint3 id : SV_DispatchThreadID)
     float flag = step(0.25, t);
 
     // float s = flag * _Elevation * 0.25 * nrand(id.xy, _Time.xy);
-    float s = flag * sin(tri * PI * 0.5) * _Elevation * 0.25 * nrand(id.xy, _Time.xy);
+    float s = flag * sin(tri * PI * 0.5) * _Elevation * 0.25 * nrand(id.xy, _Time.x);
 
     grid.scale = lerp(grid.scale, float3(1, s, 1), flag);
     grid.color = lerp(grid.color, float4(1, 1, 1, 1), flag);

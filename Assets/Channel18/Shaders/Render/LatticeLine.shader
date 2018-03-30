@@ -16,7 +16,7 @@ Shader"VJ/Channel18/Lattice/Line"
 		Pass
 		{
 			Blend One One
-			ZWrite On
+			ZWrite Off
 
 			CGPROGRAM
 			#pragma target 5.0

@@ -53,7 +53,11 @@
                 float2 displacement = snoise(float3(float2(x, y) * _Scale, _Time.y * _Speed)).xy;
                 float s = smoothstep(0, _Border * r, uv.x) * smoothstep(1.0, 1.0 - _Border * r, uv.x) * smoothstep(0, _Border, uv.y) * smoothstep(1.0, 1.0 - _Border, uv.y);
                 uv.xy += displacement * s * _T;
-                fixed4 col = tex2D(_MainTex, frac(uv));
+
+				float2 t = frac(uv * 0.5) * 2.0;
+				float2 length = float2(1.0, 1.0);
+				uv = length - abs(t - length);
+                fixed4 col = tex2D(_MainTex, uv);
                 return col;
             }
 			ENDCG
