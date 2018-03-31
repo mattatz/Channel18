@@ -11,7 +11,7 @@ Shader"VJ/Channel18/Lattice/Cuboid"
 
         _Thickness ("Thickness", Range(0.0, 1.0)) = 0.1
 		_Size ("Size", Range(0.0, 3.0)) = 1.0
-		
+		_Axis ("Axis", Vector) = (1, 1, 1, -1)
     }
 
     SubShader

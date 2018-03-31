@@ -128,7 +128,9 @@ namespace VJ.Channel18
 
         void NoteOn(MidiChannel channel, int note, float velocity)
         {
+#if UNITY_EDITOR
             Debug.Log("NoteOn: " + channel + "," + note + "," + velocity);
+#endif
             onNoteOn.Invoke(note);
         }
 
@@ -140,7 +142,9 @@ namespace VJ.Channel18
 
         void Knob(MidiChannel channel, int knobNumber, float knobValue)
         {
+#if UNITY_EDITOR
             Debug.Log("Knob: " + knobNumber + "," + knobValue);
+#endif
             onKnob.Invoke(knobNumber, knobValue);
         }
 

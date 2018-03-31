@@ -221,9 +221,6 @@ MonoBehaviour:
   extrusion: 0
   thickness: 0.015
   throttle: 0.5
-  wave: {x: 2, y: 1, z: 1, w: 0}
-  force: {x: 0, y: 0, z: 0}
-  forceDistance: 3
 --- !u!4 &28157039
 Transform:
   m_ObjectHideFlags: 0
@@ -502,7 +499,7 @@ MonoBehaviour:
   height: 16
   depth: 16
   thickness: 0
-  useLine: 1
+  useLine: 0
   noiseScale: {x: 1, y: 1, z: 1}
   baseNoiseSpeed: 0.5
   baseNoiseIntensity: 0.07
@@ -510,6 +507,7 @@ MonoBehaviour:
   noiseIntensity: 0
   line: {fileID: 951103512}
   cuboid: {fileID: 1382601781}
+  axis: {x: 1, y: 1, z: 1}
   latticeMaterials:
   - {fileID: 2100000, guid: 0825681635fbde940a7752d79176b0fb, type: 2}
   - {fileID: 2100000, guid: ec87ffbb06244794c9250e3e6c0abb4d, type: 2}

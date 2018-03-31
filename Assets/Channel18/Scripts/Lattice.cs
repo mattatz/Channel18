@@ -23,12 +23,14 @@ namespace VJ.Channel18
         protected float noiseOffset = 0f;
 
         [SerializeField] protected LatticeRenderer line, cuboid;
+        [SerializeField] protected Vector3 axis = new Vector3(1f, 1f, 1f);
 
         [SerializeField] List<Material> latticeMaterials;
         [SerializeField] List<Vector3> scales;
         [SerializeField] protected int iscale = 0;
 
         protected float _useLine, _thickness, _noiseIntensity;
+        protected Vector3 _axis;
         protected Coroutine waver, scaler;
 
         protected void Start () {
@@ -39,12 +41,14 @@ namespace VJ.Channel18
             _thickness = thickness;
             _useLine = useLine;
             _noiseIntensity = noiseIntensity;
+            _axis = axis;
         }
 
         protected void Update()
         {
             line.SetThickness(_thickness * _useLine);
             cuboid.SetThickness(_thickness * (1f - _useLine));
+            line.SetAxis(_axis); cuboid.SetAxis(_axis);
 
             latticeMaterials.ForEach(m =>
             {
@@ -60,6 +64,7 @@ namespace VJ.Channel18
             _thickness = Mathf.Lerp(_thickness, thickness, dt * 3f);
             _useLine  = Mathf.Lerp(_useLine, useLine, dt * 5f);
             _noiseIntensity = Mathf.Lerp(_noiseIntensity, noiseIntensity, Mathf.Clamp01(dt * 50f));
+            _axis = Vector3.Lerp(_axis, axis, dt * 3f);
             noiseOffset += dt * noiseSpeed;
         }
 
@@ -192,6 +197,13 @@ namespace VJ.Channel18
                 case "/lattice/scale":
                     iscale = OSCUtils.GetIValue(data, 0);
                     Scale(iscale);
+                    break;
+
+                case "/lattice/axis":
+                    var x = OSCUtils.GetFValue(data, 0);
+                    var y = OSCUtils.GetFValue(data, 1);
+                    var z = OSCUtils.GetFValue(data, 2);
+                    axis.Set(x, y, z);
                     break;
             }
         }

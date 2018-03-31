@@ -3,6 +3,7 @@ Shader"VJ/Channel18/MidairGrid"
     Properties
     {
         _Color ("Color", Color) = (1, 1, 1, 1)
+		_Emission ("Emission", Color) = (0, 0, 0, 0)
         _MainTex ("Albedo", 2D) = "white" {}
 
         [Space]

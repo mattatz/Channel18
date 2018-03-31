@@ -16,9 +16,6 @@ namespace VJ.Channel18
         [SerializeField, Range(0.1f, 1f)] protected float duration = 0.5f;
         [SerializeField, Range(0f, 1f)] protected float extrusion = 0.05f, thickness = 0.001f;
         [SerializeField, Range(0f, 1f)] protected float throttle = 0.5f;
-        [SerializeField] protected Vector4 wave;
-        [SerializeField] protected Vector3 force;
-        [SerializeField] protected float forceDistance = 3f;
 
         protected float _extrusion, _thickness;
 
@@ -94,14 +91,6 @@ namespace VJ.Channel18
             var dt = Time.deltaTime;
             _extrusion = Mathf.Lerp(_extrusion, extrusion, dt);
             _thickness = Mathf.Lerp(_thickness, thickness, dt);
-
-            compute.SetVector("_Wave", wave);
-            compute.SetVector("_Force", new Vector4(force.x, force.y, force.z, 1f / forceDistance));
-            // Compute(waveXKer, dt);
-            // Compute(waveYKer, dt);
-            // Compute(forceKer, dt);
-            // Compute(autoRotKer, dt * 5f);
-            // Compute(wobbleKer, dt);
 
             Render();
         }

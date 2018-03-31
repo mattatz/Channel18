@@ -14,6 +14,7 @@ float4 _MainTex_ST;
 float _Glossiness;
 float _Metallic;
 float _Thickness, _Size;
+float3 _Axis;
 
 #include "../Common/Quaternion.cginc"
 #include "../Common/Matrix.cginc"
@@ -22,6 +23,7 @@ float _Thickness, _Size;
 struct Attributes
 {
     float4 position : POSITION;
+	float3 local : NORMAL;
 };
 
 struct Varyings
@@ -41,6 +43,7 @@ struct Varyings
 Attributes Vertex(Attributes input, uint vid : SV_VertexID)
 {
 	float3 local = lattice_position(input.position.xyz);
+	input.local.xyz = input.position.xyz;
     input.position.xyz = mul(unity_ObjectToWorld, float4(local, 1)).xyz;
     return input;
 }
@@ -91,13 +94,22 @@ void addFace(inout TriangleStream<Varyings> OUT, float4 p[4], float3 wnrm)
 [maxvertexcount(72)]
 void Geometry (in line Attributes IN[2], inout TriangleStream<Varyings> OUT) {
     float3 pos = (IN[0].position.xyz + IN[1].position.xyz) * 0.5;
+
     float3 tangent = (IN[1].position.xyz - pos);
-	float thickness = _Thickness * _Size;
+
+    float3 dir = (IN[1].local.xyz - IN[0].local.xyz);
+	float3 ndir = normalize(dir);
+	float xaxis = step(0.999, abs(dot(ndir, float3(1, 0, 0))));
+	float yaxis = step(0.999, abs(dot(ndir, float3(0, 1, 0))));
+	float zaxis = step(0.999, abs(dot(ndir, float3(0, 0, 1))));
+
+	float scale = max(max(_Axis.x * xaxis, _Axis.y * yaxis), _Axis.z * zaxis);
+	float thickness = _Thickness * _Size * max(0, scale);
+
     float3 forward = normalize(tangent) * (length(tangent) + thickness);
     float3 nforward = normalize(forward);
 
-	float d = abs(dot(nforward, float3(0, 1, 0)));
-    float3 ntmp = cross(nforward, lerp(float3(0, 1, 0), float3(1, 0, 0), step(0.999, d)));
+    float3 ntmp = cross(nforward, lerp(float3(0, 1, 0), float3(1, 0, 0), yaxis));
     // float3 ntmp = cross(nforward, float3(0, 1, 0));
     float3 up = (cross(ntmp, nforward));
     float3 nup = normalize(up);

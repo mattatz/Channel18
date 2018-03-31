@@ -424,6 +424,7 @@ namespace VJ.Channel18
                     voxelVisible = !voxelVisible;
                     break;
                 case 50:
+                    useColor = !useColor;
                     break;
                 case 66:
                     break;
@@ -456,9 +457,10 @@ namespace VJ.Channel18
             {
                 case "/voxel/visible":
                     voxelVisible = OSCUtils.GetBoolFlag(data);
-                    Debug.Log(data.Count);
-                    Debug.Log(data[0]);
-                    Debug.Log(voxelVisible);
+                    break;
+
+                case "/voxel/color":
+                    useColor = OSCUtils.GetBoolFlag(data);
                     break;
 
                 case "/voxel/particle/mode":

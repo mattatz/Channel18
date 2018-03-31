@@ -33,6 +33,11 @@ namespace VJ.Channel18
             this.thickness = thickness;
         }
 
+        public void SetAxis(Vector3 axis)
+        {
+            block.SetVector("_Axis", axis);
+        }
+
     }
 
 }
