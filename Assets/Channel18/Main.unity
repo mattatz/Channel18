@@ -218,7 +218,7 @@ MonoBehaviour:
   massMin: 0.125
   massMax: 1
   duration: 0.5
-  extrusion: 0
+  extrusion: 0.16
   thickness: 0.015
   throttle: 0.5
 --- !u!4 &28157039
@@ -261,10 +261,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animators:
   - {fileID: 95086880}
-  - {fileID: 1684664427}
   animationSpeedMin: 0.1
   animationSpeedMax: 1
-  motion: 0
+  motion: 3
 --- !u!1 &100928077
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,7 +311,7 @@ MonoBehaviour:
     m_Center: {x: 0, y: 64, z: 0}
     m_Extent: {x: 64, y: 128, z: 64}
   gradGen: {fileID: 11400000, guid: 6b7f7dd2408efef4d8dcdcfdf4d7c5c8, type: 2}
-  throttle: 0
+  throttle: 1
   sizeCurve:
     serializedVersion: 2
     m_Curve:
@@ -428,7 +427,7 @@ MonoBehaviour:
   - label: Head
     position: {x: 0, y: 38, z: 0}
     distance: 22
-  current: 0
+  current: 2
   distance: 0
 --- !u!33 &152096829
 MeshFilter:
@@ -519,84 +518,6 @@ MonoBehaviour:
   - {x: 16, y: 5, z: 5}
   - {x: 0.5, y: 8, z: 8}
   iscale: 0
---- !u!1001 &297717152
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0.9163628
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: -0.40034893
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_RootOrder
-      value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: e9bd542b73b632448af537d610231c21, type: 2}
-    - target: {fileID: 400000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 227.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 13700000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-      propertyPath: m_CullingMode
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a, type: 3}
-  m_IsPrefabParent: 0
 --- !u!1 &459535485
 GameObject:
   m_ObjectHideFlags: 0
@@ -854,7 +775,7 @@ MonoBehaviour:
   audioAddress: /effect/audio
   reactive: 0
   material: {fileID: 2100000, guid: 5acf5cf1fcd07224db78e54f2423c2ef, type: 2}
-  t: 0
+  t: 1
 --- !u!114 &759422195
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1042,7 +963,7 @@ MonoBehaviour:
   particleUpdate: {fileID: 7200000, guid: dc110c7af97e68747b98a25256389d0a, type: 3}
   particleMode: 1
   voxelMode: 0
-  voxelVisible: 0
+  voxelVisible: 1
   emission: {r: 0, g: 0, b: 0, a: 1}
   gradGen: {fileID: 11400000, guid: 56e1c0974ed32284da2b778c5b49b22b, type: 2}
   gradientScale: 11.1
@@ -1123,6 +1044,7 @@ GameObject:
   - component: {fileID: 1181711433}
   - component: {fileID: 1181711434}
   - component: {fileID: 1181711435}
+  - component: {fileID: 1181711436}
   m_Layer: 0
   m_Name: VJController
   m_TagString: Untagged
@@ -1220,7 +1142,7 @@ MonoBehaviour:
   speed: 0.15
   speedMin: 0.05
   speedMax: 0.6
-  _distance: 1
+  _distance: 0.31
   distanceMin: -20
   distanceMax: 50
   _angle: 0.5
@@ -1237,6 +1159,24 @@ MonoBehaviour:
     scale: 0.1
     offset: 10
   polarDirection: 0
+--- !u!114 &1181711436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1181711432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 391efeef00699ec468c7ed9d4d765cc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 1181711435}
+  midair: {fileID: 28157038}
+  floor: {fileID: 1934026930}
+  voxel: {fileID: 1001449983}
+  cameraInterval: 5
+  gridInterval: 0.75
+  flowInterval: 2
 --- !u!1 &1382601777
 GameObject:
   m_ObjectHideFlags: 0
@@ -1358,7 +1298,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
       propertyPath: m_RootOrder
-      value: 12
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9500000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
       propertyPath: m_Controller
@@ -1379,11 +1319,6 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f90dfd365c4bd2841b395946b8d6e218, type: 3}
   m_IsPrefabParent: 0
---- !u!95 &1684664427 stripped
-Animator:
-  m_PrefabParentObject: {fileID: 9500000, guid: 666dcf8b640d8524a9c1ce6c4d2d432a,
-    type: 3}
-  m_PrefabInternal: {fileID: 297717152}
 --- !u!1 &1848063876
 GameObject:
   m_ObjectHideFlags: 0
@@ -1501,7 +1436,7 @@ MonoBehaviour:
   receiveShadow: 1
   massMin: 0.26
   massMax: 1
-  thickness: 0
+  thickness: 1
   plasticity: 10
   noiseSpeed: 10
   noiseScale: 0.0015

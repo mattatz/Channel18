@@ -32,6 +32,10 @@ namespace VJ.Channel18
         void Start () {
             Trigger(motion);
             motions = Enum.GetValues(typeof(FigureMotion));
+            animators.ForEach(animator =>
+            {
+                animator.speed = animationSpeedMin;
+            });
         }
 
         public void Trigger(FigureMotion m)
@@ -39,7 +43,6 @@ namespace VJ.Channel18
             if (m == motion) return;
 
             var key = Enum.GetName(typeof(FigureMotion), (int)m);
-            // animator.SetTrigger(key);
             animators.ForEach(animator =>
             {
                 if(animator.gameObject.activeInHierarchy)
@@ -59,7 +62,6 @@ namespace VJ.Channel18
             switch(knobNumber)
             {
                 case 2:
-                    // animator.speed = Mathf.Lerp(animationSpeedMin, animationSpeedMax, knobValue); 
                     animators.ForEach(animator =>
                     {
                         if (animator.gameObject.activeInHierarchy) { 
