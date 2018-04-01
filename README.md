@@ -1,13 +1,19 @@
 VJ Set at CHANNEL#18
 =====================
 
+Live visual performance at [CHANNEL#18](https://www.super-deluxe.com/room/4473/).
+
+Made with Unity.
+
 ![Demo1](https://raw.githubusercontent.com/mattatz/Channel18/master/Captures/Channel18_1.gif)
 
 ![Demo2](https://raw.githubusercontent.com/mattatz/Channel18/master/Captures/Channel18_2.gif)
 
-Live visual performance at [CHANNEL#18](https://www.super-deluxe.com/room/4473/).
+![Movie1](https://raw.githubusercontent.com/mattatz/Channel18/master/Captures/Movie_1.gif)
 
-Made with Unity.
+![Movie2](https://raw.githubusercontent.com/mattatz/Channel18/master/Captures/Movie_2.gif)
+
+Movies by [@tokyomax](https://twitter.com/tokyomax) and [@ten_prism](https://twitter.com/ten_prism)
 
 # Sources
 
