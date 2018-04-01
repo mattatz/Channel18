@@ -7,6 +7,8 @@ VJ Set at CHANNEL#18
 
 Live visual performance at [CHANNEL#18](https://www.super-deluxe.com/room/4473/).
 
+Made with Unity.
+
 # Sources
 
 - Standard male figure - https://clara.io/view/d49ee603-8e6c-4720-bd20-9e3d7b13978a
