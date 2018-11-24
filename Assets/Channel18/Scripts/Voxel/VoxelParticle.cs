@@ -15,7 +15,7 @@ namespace VJ.Channel18
         public Color color;
         public float speed;
         public float lifetime;
-        public bool flow;
+        public uint flow;
     }
 
 }

@@ -130,7 +130,7 @@ namespace VoxelSystem {
 			var voxels = data.GetData();
 			for(int i = 0, n = voxels.Length; i < n; i++) {
 				var v = voxels[i];
-				if(v.flag) {
+				if(v.flag > 0) {
 					// back
 					CalculatePlane(
 						vertices, normals, centers, uvs, triangles,

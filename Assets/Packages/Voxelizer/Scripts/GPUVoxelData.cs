@@ -7,7 +7,7 @@ namespace VoxelSystem {
 	public struct Voxel_t {
 		public Vector3 position;
         public Vector2 uv;
-		public bool flag;
+		public uint flag;
 	}
 
 	public class GPUVoxelData : System.IDisposable {

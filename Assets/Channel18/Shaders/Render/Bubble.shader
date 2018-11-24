@@ -17,9 +17,9 @@
 
 	SubShader
 	{
-		Tags { 
-            "RenderType"="Opaque" 
-            "Queue"="Transparent+1" 
+		Tags {
+            "RenderType"="Opaque"
+            "Queue"="Transparent+1"
         }
 		LOD 100
         GrabPass {}
@@ -34,7 +34,7 @@
 			#pragma fragment frag
             #pragma multi_compile_instancing
             #pragma instancing_options procedural:setup
-			
+
 			#include "UnityCG.cginc"
             #include "../Common/Random.cginc"
             #include "../Common/Quaternion.cginc"
@@ -85,7 +85,7 @@
                 unity_WorldToObject = inverse(unity_ObjectToWorld);
             #endif
             }
-			
+
 			v2f vert (appdata IN)
 			{
 				v2f OUT;
